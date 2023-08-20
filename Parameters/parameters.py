@@ -12,6 +12,18 @@ import tkinter as tk
 
 class Parameters(ABC):
 
+    def __init__(self):
+        self._dict_combo = {}
+        self._entries = {}
+
+    @property
+    def dict_combo(self):
+        return self._dict_combo
+
+    @property
+    def entries(self):
+        return self._entries
+
     def load_params(self, master, attrbs) -> List[Union[CTkCheckBox, CTkComboBox, CTkRadioButton, CTkTextbox, CTkEntry]]:
         params = []
         for atr in attrbs:
@@ -19,6 +31,8 @@ class Parameters(ABC):
             if input_type == ctes.CHECKBOX:
                 chkbox = CheckboxInput(
                     master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
                     corner_radius=0,
                     text_color=ctes.BLACK,
                     text=atr[1],
@@ -29,8 +43,11 @@ class Parameters(ABC):
                 check = chkbox.get_item()
                 params.append(check)
             elif input_type == ctes.COMBOBOX:
+                self._dict_combo[atr[1]] = tk.StringVar(value=atr[1])
                 cmbbox = ComboboxInput(
                     master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
                     corner_radius=0,
                     text_color=ctes.BLACK,
                     font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
@@ -39,13 +56,15 @@ class Parameters(ABC):
                     dropdown_hover_color=ctes.LIGHT_GRAY_COLOR,
                     dropdown_font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
                     values=self.as_str(atr[2]),
-                    variable=tk.StringVar(value=''),
+                    variable=self._dict_combo[atr[1]],
                 )
                 combo = cmbbox.get_item()
                 params.append(combo)
             elif input_type == ctes.RADIOBUTTON:
                 radiobtn = RadiobuttonInput(
                     master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
                     corner_radius=0,
                     text_color=ctes.BLACK,
                     font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
@@ -61,23 +80,29 @@ class Parameters(ABC):
             elif input_type == ctes.TEXTBOX:
                 txtbox = TextboxInput(
                     master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
                     corner_radius=0,
                     text_color=ctes.BLACK,
                     font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
-                    fg_color=ctes.BG_COLOR,
+                    fg_color=ctes.LIGHT_BLUE_DARK,
                     border_width=2,
                     border_color=ctes.BLACK,
                 )
                 textbox = txtbox.get_item()
                 params.append(textbox)
             elif input_type == ctes.ENTRY:
+                self._entries[atr[1]] = tk.StringVar(value=atr[1])
                 entry = EntryInput(
                     master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
                     corner_radius=0,
                     text_color=ctes.BLACK,
                     font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
-                    fg_color=ctes.BG_COLOR,
+                    fg_color=ctes.LIGHT_BLUE_DARK,
                     placeholder_text=atr[1],
+                    textvariable=self._entries[atr[1]],
                 )
                 entry_input = entry.get_item()
                 params.append(entry_input)

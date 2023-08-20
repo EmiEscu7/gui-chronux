@@ -1,8 +1,7 @@
-from abc import ABC
 from os import stat
 import pandas as pd
 from scipy.io import loadmat
-from typing import List
+from typing import List, Tuple
 
 from InfoFiles.info_file import InfoFile
 
@@ -10,11 +9,9 @@ from InfoFiles.info_file import InfoFile
 class LFPFile(InfoFile):
 
     def __init__(self, path):
+        super().__init__()
         self._path = path
         self._file = loadmat(self._path)
-        self._file_name = None
-        self._size_file = None
-        self._date_file = None
         self._min_freq = None
         self._max_freq = None
         self._frequencies = None
@@ -28,14 +25,14 @@ class LFPFile(InfoFile):
     def extract_info(self) -> None:
         # get file name
         path_splitted = self._path.split("/")
-        file_name = path_splitted[len(path_splitted) - 1].split(".")[0]
+        self.file_name = path_splitted[len(path_splitted) - 1].split(".")[0]
 
         # size of file
         file_stats = stat(self._path)
-        size_file = round(file_stats.st_size / (1024 * 1024), 2)  # in MB
+        self.size_file = round(file_stats.st_size / (1024 * 1024), 2)  # in MB
 
         # date modified
-        date_modified = self._file['__header__'].decode('utf-8').split('Created on:')[1].strip()
+        self.date_file = self._file['__header__'].decode('utf-8').split('Created on:')[1].strip()
 
         # nex data
         self._nex = pd.DataFrame(self._file['nex'])
@@ -62,7 +59,7 @@ class LFPFile(InfoFile):
         size = int(len(self._nex.columns)/len(self._signals)) +1
         for index in range(1, size):
             times.append(self._nex_column_names.loc[0][index][0].split()[2].strip())
-        return  times
+        return times
 
     def _get_signals(self) -> List[str]:
         signals = []
@@ -76,6 +73,12 @@ class LFPFile(InfoFile):
         for item in self._nex.loc[0].items():
             freqs.append(item[1])
         return freqs
+    
+    def show_info(self) -> List[Tuple[str, any]]:
+        info = [('Name', self.file_name), ('Size', self.size_file), ('Date', self.date_file),
+                ('Min. Frequency', self.min_freq), ('Max. Frequency', self.max_freq),
+                ('Duration', self.duration), ('Number Signals', self.number_of_signals)]
+        return info
 
     def load_params(self):
         pass
@@ -87,18 +90,6 @@ class LFPFile(InfoFile):
     @property
     def file(self):
         return self._file
-
-    @property
-    def file_name(self):
-        return self._file_name
-
-    @property
-    def size_file(self):
-        return self._size_file
-
-    @property
-    def date_file(self):
-        return self._date_file
 
     @property
     def min_freq(self):

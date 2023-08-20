@@ -7,12 +7,14 @@ from PIL import Image
 
 
 class File:
-    def __init__(self):
+    def __init__(self, fn_show):
         self.INIT_OPTION_RB_TYPE_FILE = tk.IntVar(value=ctes.LFP_INT)
         self._path = None
         self._type_file = self.INIT_OPTION_RB_TYPE_FILE.get()
         self._info_file = None
         self._type_file_window = None
+        self._fn_show = fn_show
+
 
     def select_format_file(self, master: ctk.CTkToplevel) -> ctk.CTkFrame:
         def radiobutton_event():
@@ -83,7 +85,8 @@ class File:
     def select_type(self):
         self._type_file_window = ctk.CTkToplevel()
         self._type_file_window.title("Select Format File")
-        self._type_file_window.config(width=500, height=300)
+        self._type_file_window.geometry("500x300")
+        self._type_file_window.wm_attributes("-topmost", True)
         frame_sf = self.select_format_file(self._type_file_window)
         frame_sf.pack()
 
@@ -95,8 +98,8 @@ class File:
                 self._info_file = LFPFile(self._path)
             elif self._type_file == ctes.SPIKE_INT:
                 pass
-        print(self._info_file)
         if self._info_file is not None: self._info_file.extract_info()
+        self._fn_show()
 
     def load(self) -> None:
         self.select_type()
