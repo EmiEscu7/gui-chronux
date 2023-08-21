@@ -14,12 +14,12 @@ class Plot:
             cls._tabview = None
         return cls._instance
 
-    def add_plot(cls, x, y, xlabel, ylabel, title):
+    def add_plot(cls, x, y, xlabel, ylabel, title_plot, title) -> None:
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
 
         ax.plot(x, y)
-        ax.set_title(title, fontsize=16)
+        ax.set_title(title_plot, fontsize=16)
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
 
@@ -27,6 +27,7 @@ class Plot:
         canvas = FigureCanvasTkAgg(fig, master=cls._tabview.tab(title))
         canvas.get_tk_widget().pack()
         canvas.draw()
+        cls._tabview.set(title)
 
     def get_frame(cls, master) -> ctk.CTkFrame:
         frame = ctk.CTkFrame(

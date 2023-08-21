@@ -80,9 +80,6 @@ class LFPFile(InfoFile):
                 ('Duration', self.duration), ('Number Signals', self.number_of_signals)]
         return info
 
-    def load_params(self):
-        pass
-
     @property
     def path(self):
         return self._path

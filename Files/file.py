@@ -82,7 +82,7 @@ class File:
 
         return frame
 
-    def select_type(self):
+    def select_type(self) -> None:
         self._type_file_window = ctk.CTkToplevel()
         self._type_file_window.title("Select Format File")
         self._type_file_window.geometry("500x300")
@@ -90,7 +90,7 @@ class File:
         frame_sf = self.select_format_file(self._type_file_window)
         frame_sf.pack()
 
-    def select_file(self):
+    def select_file(self) -> None:
         if self._type_file_window is not None: self._type_file_window.destroy()
         self._path = askopenfilename()
         if self._path is not None and self._path != '':

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List, Tuple
 
 
 class InfoFile(ABC):
@@ -9,15 +10,11 @@ class InfoFile(ABC):
         self._date_file = None
 
     @abstractmethod
-    def extract_info(self):
+    def extract_info(self) -> None:
         pass
 
     @abstractmethod
-    def load_params(self):
-        pass
-
-    @abstractmethod
-    def show_info(self):
+    def show_info(self) -> List[Tuple[str, any]]:
         pass
 
     @property

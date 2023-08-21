@@ -26,5 +26,5 @@ class Input(ABC):
         self.state = state
 
     @abstractmethod
-    def get_item(self) -> ctk.CTkEntry or ctk.CTkTextbox or ctk.CTkRadioButton or ctk.CTkComboBox or ctk.CTkCheckBox:
+    def get_item(self) -> Union[ctk.CTkEntry, ctk.CTkTextbox, ctk.CTkRadioButton, ctk.CTkComboBox, ctk.CTkCheckBox]:
         pass

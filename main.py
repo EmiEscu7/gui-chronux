@@ -14,7 +14,6 @@ class GUI:
         self._version = None
         self._select_file = None
         self._analysis = None
-        self._params_section = None
         self._info_section = None
         self._plot_section = None
         self._export = None
