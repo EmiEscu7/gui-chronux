@@ -1,5 +1,6 @@
 from typing import List, Tuple
 import customtkinter as ctk
+import tkinter as tk
 import constants as ctes
 
 
@@ -151,3 +152,6 @@ def get_frame_tab(master, data: List[Tuple[str, any]]) -> ctk.CTkFrame:
         label.pack(pady=ctes.PADY_LABELS)
 
     return frame
+
+
+

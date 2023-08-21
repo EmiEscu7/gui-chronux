@@ -2,7 +2,7 @@ class Plot():
 
     def __init__(self):
         self._id = None
-        self._plot= None
+        self._plot = None
 
     def show(self) -> None:
         pass

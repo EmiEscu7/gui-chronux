@@ -35,6 +35,6 @@ class PSDParameters(Parameters):
             'taper2': int(self.entries[self._taper2[1]].get()),
             'fs': int(self.entries[self._sample_frequency[1]].get()),
             'freq': float(self.dict_combo[self._frequencies[1]].get()),
-            'time1': int(self.dict_combo[self._idx1_signal[1]].get()[:-1]),
-            'time2': int(self.dict_combo[self._idx2_signal[1]].get()[:-1]),
+            'time1': str(self.dict_combo[self._idx1_signal[1]].get()),
+            'time2': str(self.dict_combo[self._idx2_signal[1]].get()),
         }

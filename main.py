@@ -4,6 +4,7 @@ from Analysis.psd_analysis import PSDAnalysis
 from Files.file import File
 from PIL import Image
 import constants as ctes
+from Plots.Plot import Plot
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab
 
 
@@ -15,7 +16,7 @@ class GUI:
         self._analysis = None
         self._params_section = None
         self._info_section = None
-        self._plot = None
+        self._plot_section = None
         self._export = None
         self._load_files = None
         self._frame_params = None
@@ -80,25 +81,13 @@ class GUI:
         """
             PLOT SECTION
         """
-        graph_image = ctk.CTkImage(
-            light_image=Image.open('./assets/foo_graph.png'),
-            dark_image=Image.open('./assets/foo_graph.png'),
-            size=(700, 650)
-        )
-        label_graph = ctk.CTkLabel(
-            master=app,
-            text='',
-            image=graph_image,
-            width=700,
-            height=650,
-            fg_color='transparent',
-        )
-        label_graph.pack()
-        label_graph.place(relx=0.25, rely=0.1, anchor=ctk.NW)
+        self._plot_section = Plot().get_frame(app)
+        self._plot_section.pack()
+        self._plot_section.place(relx=0.25, rely=0.1, anchor=ctk.NW)
 
         """
-                FRAME TO EXPORT DATA IN DIFFERENTS FORMATS
-            """
+            FRAME TO EXPORT DATA IN DIFFERENTS FORMATS
+        """
 
         def on_enter_pdf(e):
             btn_pdf.configure(image=pdf_icon_color)

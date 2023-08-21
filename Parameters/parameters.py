@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import List, Union, Dict
 from customtkinter import CTkCheckBox, CTkComboBox, CTkRadioButton, CTkTextbox, CTkEntry
 from Parameters.Inputs.checkbox_input import CheckboxInput
 from Parameters.Inputs.combobox_input import ComboboxInput
@@ -113,5 +113,5 @@ class Parameters(ABC):
         return [str(d) for d in data]
 
     @abstractmethod
-    def get_data_params(self) -> None:
+    def get_data_params(self) -> Dict:
         pass
