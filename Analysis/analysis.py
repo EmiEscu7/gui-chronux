@@ -8,6 +8,11 @@ class Analysis(ABC):
         self._name = name
         self._parameters = None
         self._default_values = {}
+        self._boxes = []
+
+    @property
+    def boxes(self):
+        return self._boxes
 
     @property
     def default_values(self):
@@ -33,6 +38,10 @@ class Analysis(ABC):
     def parameters(self, value):
         self._parameters = value
 
+    @boxes.setter
+    def boxes(self, value):
+        self._boxes = value
+
     @abstractmethod
     def load_analysis(self) -> None:
         pass
@@ -47,4 +56,12 @@ class Analysis(ABC):
 
     @abstractmethod
     def generate(self) -> None:
+        pass
+
+    @abstractmethod
+    def save_params(self) -> None:
+        pass
+
+    @abstractmethod
+    def destroy(self) -> None:
         pass

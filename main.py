@@ -27,7 +27,12 @@ class GUI:
         frame_tab = get_frame_tab(self._tabview.tab(tab_name), data)
         frame_tab.pack()
 
+    def callback_save_params(self):
+        self._analysis.save_params()
+
     def callback_type_analysis(self, choice):
+        if self._analysis is not None:
+            self._analysis.destroy()
         if choice == 'PSD Analysis':
             self._analysis = PSDAnalysis()
             self._analysis.load_analysis(self._load_files.info_file)
@@ -59,7 +64,7 @@ class GUI:
         """
             PARAMETERS SECTION
         """
-        self._frame_params = frame_parameters(app, self.command_function_btn)
+        self._frame_params = frame_parameters(app, self.command_function_btn, self.callback_save_params)
         self._frame_params.pack()
         self._frame_params.place(relx=0.01, rely=0.25, anchor=ctk.NW)
 

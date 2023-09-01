@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from PIL import Image
 import customtkinter as ctk
 import tkinter as tk
 import constants as ctes
@@ -17,7 +18,7 @@ def frame_load_files(master) -> ctk.CTkFrame:
     return frame
 
 
-def frame_parameters(master, command_function_btn) -> ctk.CTkFrame:
+def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.CTkFrame:
     frame = ctk.CTkFrame(
         master=master,
         width=ctes.WIDTH_LEFT_SIDE,
@@ -56,6 +57,25 @@ def frame_parameters(master, command_function_btn) -> ctk.CTkFrame:
     generate_btn.cget("font").configure(family=ctes.FAMILY_FONT)
     generate_btn.cget("font").configure(size=ctes.SUBTITLE_SIZE)
     generate_btn.pack(padx=ctes.PADX_BUTTON, pady=ctes.PADY_BUTTON)
+
+    save_icon = ctk.CTkImage(
+        light_image=Image.open('./assets/save_icon.png'),
+        dark_image=Image.open('./assets/save_icon.png'),
+        size=(25, 25)
+    )
+
+    btn_save_params = ctk.CTkButton(
+        master=frame,
+        text='',
+        fg_color='transparent',
+        hover_color=ctes.WITHE,
+        corner_radius=1000,
+        border_width=0,
+        image=save_icon,
+        width=25,
+        command=callback_save_params,
+    )
+    btn_save_params.pack(side=tk.LEFT, padx=10, pady=ctes.PADY_BUTTON)
 
     return frame
 

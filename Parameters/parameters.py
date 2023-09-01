@@ -141,3 +141,8 @@ class Parameters(ABC):
     @abstractmethod
     def get_data_params(self) -> Dict:
         pass
+
+    def destroy(self):
+        self._dict_combo = {}
+        self._popups = {}
+        self._entries = {}

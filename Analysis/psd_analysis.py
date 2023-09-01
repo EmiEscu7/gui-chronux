@@ -1,14 +1,15 @@
 from Analysis.analysis import Analysis
 from Parameters.psd_parameters import PSDParameters
 from InfoFiles.lfp_file import LFPFile
-from typing import List, Tuple, Dict
+from typing import List, Dict
 import constants as ctes
 import subprocess
-import matplotlib.pyplot as plt
+import json
 import json
 import numpy as np
 import os
 from Plots.Plot import Plot
+
 
 class PSDAnalysis(Analysis):
     def __init__(self):
@@ -16,19 +17,25 @@ class PSDAnalysis(Analysis):
         self._info_file = None
         self._file_name = 'analysis'
         self._number_session = 0
+        self._path_persist = './Persist/Parameters/psd_default.json'
+
+    def _load_default_params(self, info_file):
+        try:
+            with open(self._path_persist, "r") as file:
+                self.default_values = json.load(file)
+        except:
+            self.default_values = {
+                'signal': info_file.signals[0],
+                'taper1': '3',
+                'taper2': '5',
+                'sample_freq': '200',
+                'freq': str(info_file.frequencies[0]),
+                'time1': info_file.times[0],
+                'time2': info_file.times[len(info_file.times) - 1],
+            }
 
     def load_analysis(self, info_file: LFPFile) -> None:
-
-        self.default_values = {
-            'signal': info_file.signals[0],
-            'taper1': '3',
-            'taper2': '5',
-            'sample_freq': '200',
-            'freq': str(info_file.frequencies[0]),
-            'time1': info_file.times[0],
-            'time2': info_file.times[len(info_file.times)-1],
-        }
-
+        self._load_default_params(info_file)
         signals = (ctes.COMBOBOX, 'Signal', info_file.signals, self.default_values['signal'])
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
@@ -42,8 +49,10 @@ class PSDAnalysis(Analysis):
 
     def _as_tuple(self, datos):
         return [(dato) for dato in datos]
+
     def show_params(self, master) -> None:
-        for param in self.parameters.load_params(master, []):
+        self.boxes = self.parameters.load_params(master, [])
+        for param in self.boxes:
             param.pack(padx=ctes.PADX_INPUTS, pady=ctes.PADY_INPUTS)
 
     def get_value_parameters(self) -> Dict:
@@ -112,4 +121,37 @@ class PSDAnalysis(Analysis):
 
         # show plot
         self._number_session += 1
-        Plot().add_plot(f, 10*np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)', f"{self._number_session} - Spectral Power Density (PSD)")
+        Plot().add_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)',
+                        f"{self._number_session} - Spectral Power Density (PSD)")
+
+    def save_params(self) -> None:
+        data = self.get_value_parameters()
+        str_signal = data['signal']
+        signal = self._info_file.signals.index(str_signal)
+        taper1 = data['taper1']
+        taper2 = data['taper2']
+        fs = data['fs']
+        str_freq = data['freq']
+        freq = self._info_file.frequencies.index(str_freq) + 1
+        str_time1 = data['time1']
+        time1 = self._info_file.times.index(str_time1)
+        str_time2 = data['time2']
+        time2 = self._info_file.times.index(str_time2)
+
+        self.default_values = {
+            'signal': signal,
+            'taper1': str(taper1),
+            'taper2': str(taper2),
+            'sample_freq': str(fs),
+            'freq': str(freq),
+            'time1': str(time1),
+            'time2': str(time2),
+        }
+
+        with open(self._path_persist, "w") as file:
+            json.dump(self.default_values, file)
+
+    def destroy(self) -> None:
+        self.parameters.destroy()
+        for box in self.boxes:
+            box.destroy()
