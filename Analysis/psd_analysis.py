@@ -5,7 +5,6 @@ from typing import List, Dict
 import constants as ctes
 import subprocess
 import json
-import json
 import numpy as np
 import os
 from Plots.Plot import Plot
@@ -131,12 +130,9 @@ class PSDAnalysis(Analysis):
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
-        str_freq = data['freq']
-        freq = self._info_file.frequencies.index(str_freq) + 1
-        str_time1 = data['time1']
-        time1 = self._info_file.times.index(str_time1)
-        str_time2 = data['time2']
-        time2 = self._info_file.times.index(str_time2)
+        freq = data['freq']
+        time1 = data['time1']
+        time2 = data['time2']
 
         self.default_values = {
             'signal': signal,
