@@ -64,6 +64,7 @@ class Parameters(ABC):
                     values=self.as_str(atr[2]),
                     variable=self._dict_combo[atr[1]],
                 )
+                self._dict_combo[atr[1]].set(atr[3])
                 combo = cmbbox.get_item()
                 params.append(combo)
             elif input_type == ctes.RADIOBUTTON:
@@ -110,6 +111,7 @@ class Parameters(ABC):
                     placeholder_text=atr[1],
                     textvariable=self._entries[atr[1]],
                 )
+                self._entries[atr[1]].set(atr[3])
                 entry_input = entry.get_item()
                 params.append(entry_input)
             elif input_type == ctes.POPUP:
@@ -127,6 +129,7 @@ class Parameters(ABC):
                     values=self.as_str(atr[2]),
                     columns=[(atr[1])],
                 )
+                self._popups[atr[1]].set(atr[3])
                 popup_input = popup.get_item()
                 params.append(popup_input)
 

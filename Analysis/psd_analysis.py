@@ -18,13 +18,24 @@ class PSDAnalysis(Analysis):
         self._number_session = 0
 
     def load_analysis(self, info_file: LFPFile) -> None:
-        signals = (ctes.COMBOBOX, 'Signal', info_file.signals)
-        taper1 = (ctes.ENTRY, 'Taper 1', '')
-        taper2 = (ctes.ENTRY, 'Taper 2', '')
-        fs = (ctes.ENTRY, 'Frequency sample', '')
-        freqs = (ctes.POPUP, ('Frequency'), self._as_tuple(info_file.frequencies))
-        idx1 = (ctes.COMBOBOX, 'Time 1', info_file.times)
-        idx2 = (ctes.COMBOBOX, 'Time 2', info_file.times)
+
+        self.default_values = {
+            'signal': info_file.signals[0],
+            'taper1': '3',
+            'taper2': '5',
+            'sample_freq': '200',
+            'freq': str(info_file.frequencies[0]),
+            'time1': info_file.times[0],
+            'time2': info_file.times[len(info_file.times)-1],
+        }
+
+        signals = (ctes.COMBOBOX, 'Signal', info_file.signals, self.default_values['signal'])
+        taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
+        taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
+        fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
+        freqs = (ctes.POPUP, ('Frequency'), self._as_tuple(info_file.frequencies), self.default_values['freq'])
+        idx1 = (ctes.COMBOBOX, 'Time 1', info_file.times, self.default_values['time1'])
+        idx2 = (ctes.COMBOBOX, 'Time 2', info_file.times, self.default_values['time2'])
 
         self._info_file = info_file
         self.parameters = PSDParameters(signals, taper1, taper2, fs, freqs, idx1, idx2)

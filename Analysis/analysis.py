@@ -7,6 +7,11 @@ class Analysis(ABC):
     def __init__(self, name):
         self._name = name
         self._parameters = None
+        self._default_values = {}
+
+    @property
+    def default_values(self):
+        return self._default_values
 
     @property
     def name(self):
@@ -15,6 +20,10 @@ class Analysis(ABC):
     @property
     def parameters(self):
         return self._parameters
+
+    @default_values.setter
+    def default_values(self, value):
+        self._default_values = value
 
     @name.setter
     def name(self, value):
