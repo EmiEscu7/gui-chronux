@@ -56,19 +56,18 @@ class PopupInput(Input):
         label = ctk.CTkLabel(
             master=frame,
             textvariable=self._textvariable,
-            width=int(self.width/2),
+            width=int(self.width/2)-25,
             height=self.height,
             corner_radius=0,
             fg_color='transparent',
             text_color=ctes.BLACK,
-            anchor=ctk.NW,
         )
-        label.pack(side=tk.LEFT, padx=10, pady=5)
+        label.pack(side=tk.LEFT)
 
         btn_popup = ctk.CTkButton(
             master=frame,
-            width=150,
-            anchor=ctk.N,
+            width=int(self.width/2)-25,
+            # anchor=ctk.N,
             fg_color=ctes.LIGHT_BLUE_DARK,
             text_color=ctes.BLACK,
             text_color_disabled=ctes.WITHE,
@@ -79,6 +78,6 @@ class PopupInput(Input):
             command=self._open_popup,
             font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
         )
-        btn_popup.pack(side=tk.RIGHT, padx=10)
+        btn_popup.pack(padx=10)
 
         return frame

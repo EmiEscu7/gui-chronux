@@ -75,7 +75,8 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         width=25,
         command=callback_save_params,
     )
-    btn_save_params.pack(side=tk.LEFT, padx=10, pady=ctes.PADY_BUTTON)
+    btn_save_params.pack(side=tk.RIGHT, padx=10, pady=ctes.PADY_BUTTON)
+    btn_save_params.place(relx=0.8, y=5, anchor=ctk.NW)
 
     return frame
 

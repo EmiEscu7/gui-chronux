@@ -125,8 +125,7 @@ class PSDAnalysis(Analysis):
 
     def save_params(self) -> None:
         data = self.get_value_parameters()
-        str_signal = data['signal']
-        signal = self._info_file.signals.index(str_signal)
+        signal = data['signal']
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
