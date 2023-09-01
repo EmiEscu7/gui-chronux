@@ -30,11 +30,11 @@ class PSDParameters(Parameters):
 
     def get_data_params(self) -> Dict:
         return {
-            'signal': str(self.dict_combo[self._signals[1]].get()),
-            'taper1': int(self.entries[self._taper1[1]].get()),
-            'taper2': int(self.entries[self._taper2[1]].get()),
-            'fs': int(self.entries[self._sample_frequency[1]].get()),
-            'freq': float(self.dict_combo[self._frequencies[1]].get()),
-            'time1': str(self.dict_combo[self._idx1_signal[1]].get()),
-            'time2': str(self.dict_combo[self._idx2_signal[1]].get()),
+            'signal': str(self.dict_combo[self._signals[1]].get(), 0),
+            'taper1': int(self.entries[self._taper1[1]].get(), 3),
+            'taper2': int(self.entries[self._taper2[1]].get(), 5),
+            'fs': int(self.entries[self._sample_frequency[1]].get(), 200),
+            'freq': float(self.popups[self._frequencies[1]].get(), 0),
+            'time1': str(self.dict_combo[self._idx1_signal[1]].get(), 0),
+            'time2': str(self.dict_combo[self._idx2_signal[1]].get(), 0),
         }

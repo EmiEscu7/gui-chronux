@@ -31,6 +31,19 @@ class CheckboxInput(Input):
             offvalue: Optional[Union[str, int]] = None,
     ):
         super().__init__(master, width, height, corner_radius, fg_color, text_color, font, state)
+        self._checkbox_width = checkbox_width
+        self._checkbox_height = checkbox_height
+        self._border_width = border_width
+        self._border_color = border_color
+        self._hover_color = hover_color
+        self._text_color_disabled = text_color_disabled
+        self._text = text
+        self._textvariable = textvariable
+        self._hover = hover
+        self._command = command
+        self._variable = variable
+        self._onvalue = onvalue
+        self._offvalue = offvalue
 
 
 

@@ -6,6 +6,7 @@ from Parameters.Inputs.combobox_input import ComboboxInput
 from Parameters.Inputs.radiobutton_input import RadiobuttonInput
 from Parameters.Inputs.textbox_input import TextboxInput
 from Parameters.Inputs.entry_input import EntryInput
+from Parameters.Inputs.popup_input import PopupInput
 import constants as ctes
 import tkinter as tk
 
@@ -15,10 +16,15 @@ class Parameters(ABC):
     def __init__(self):
         self._dict_combo = {}
         self._entries = {}
+        self._popups = {}
 
     @property
     def dict_combo(self):
         return self._dict_combo
+
+    @property
+    def popups(self):
+        return self._popups
 
     @property
     def entries(self):
@@ -43,7 +49,7 @@ class Parameters(ABC):
                 check = chkbox.get_item()
                 params.append(check)
             elif input_type == ctes.COMBOBOX:
-                self._dict_combo[atr[1]] = tk.StringVar(value=atr[1])
+                self._dict_combo[atr[1]] = tk.StringVar(value=atr[3])
                 cmbbox = ComboboxInput(
                     master=master,
                     width=ctes.INPUT_WIDTH,
@@ -92,7 +98,7 @@ class Parameters(ABC):
                 textbox = txtbox.get_item()
                 params.append(textbox)
             elif input_type == ctes.ENTRY:
-                self._entries[atr[1]] = tk.StringVar(value=atr[1])
+                self._entries[atr[1]] = tk.StringVar(value=atr[3])
                 entry = EntryInput(
                     master=master,
                     width=ctes.INPUT_WIDTH,
@@ -106,6 +112,23 @@ class Parameters(ABC):
                 )
                 entry_input = entry.get_item()
                 params.append(entry_input)
+            elif input_type == ctes.POPUP:
+                self._popups[atr[1]] = tk.StringVar(value=atr[3])
+                popup = PopupInput(
+                    master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
+                    corner_radius=0,
+                    text_color=ctes.BLACK,
+                    font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
+                    fg_color=ctes.LIGHT_BLUE_DARK,
+                    placeholder_text=atr[1],
+                    textvariable=self._popups[atr[1]],
+                    values=self.as_str(atr[2]),
+                    columns=[(atr[1])],
+                )
+                popup_input = popup.get_item()
+                params.append(popup_input)
 
         return params
 

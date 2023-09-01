@@ -6,6 +6,7 @@ from PIL import Image
 import constants as ctes
 from Plots.Plot import Plot
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab
+from Utils.PopupBuscador import PopupBuscador
 
 
 class GUI:
@@ -199,3 +200,4 @@ if __name__ == '__main__':
     gui = GUI()
     app = gui.load_gui("1366x768")
     app.mainloop()
+

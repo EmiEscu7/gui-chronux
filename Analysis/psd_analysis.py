@@ -22,13 +22,15 @@ class PSDAnalysis(Analysis):
         taper1 = (ctes.ENTRY, 'Taper 1', '')
         taper2 = (ctes.ENTRY, 'Taper 2', '')
         fs = (ctes.ENTRY, 'Frequency sample', '')
-        freqs = (ctes.COMBOBOX, 'Frequency', info_file.frequencies)
+        freqs = (ctes.POPUP, ('Frequency'), self._as_tuple(info_file.frequencies))
         idx1 = (ctes.COMBOBOX, 'Time 1', info_file.times)
         idx2 = (ctes.COMBOBOX, 'Time 2', info_file.times)
 
         self._info_file = info_file
         self.parameters = PSDParameters(signals, taper1, taper2, fs, freqs, idx1, idx2)
 
+    def _as_tuple(self, datos):
+        return [(dato) for dato in datos]
     def show_params(self, master) -> None:
         for param in self.parameters.load_params(master, []):
             param.pack(padx=ctes.PADX_INPUTS, pady=ctes.PADY_INPUTS)
