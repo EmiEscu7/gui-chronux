@@ -17,6 +17,11 @@ class Parameters(ABC):
         self._dict_combo = {}
         self._entries = {}
         self._popups = {}
+        self._dict_checks = {}
+
+    @property
+    def dict_checks(self):
+        return self._dict_checks
 
     @property
     def dict_combo(self):
@@ -35,17 +40,25 @@ class Parameters(ABC):
         for atr in attrbs:
             input_type = atr[0]
             if input_type == ctes.CHECKBOX:
+                self._dict_checks[atr[1]] = tk.BooleanVar(value=atr[3])
                 chkbox = CheckboxInput(
                     master=master,
                     width=ctes.INPUT_WIDTH,
                     height=ctes.INPUT_HEIGHT,
-                    corner_radius=0,
+                    corner_radius=10,
                     text_color=ctes.BLACK,
                     text=atr[1],
                     textvariable=tk.StringVar(value=atr[1]),
                     variable=tk.IntVar(value=atr[2]),
                     font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
+                    checkbox_width=ctes.INPUT_WIDTH_CHECK,
+                    checkbox_height=ctes.INPUT_HEIGHT_CHECK,
+                    fg_color=ctes.BLACK,
+                    hover_color=ctes.BLACK,
+                    border_color=ctes.BLACK,
+                    border_width=1,
                 )
+                self._dict_checks[atr[1]].set(atr[3])
                 check = chkbox.get_item()
                 params.append(check)
             elif input_type == ctes.COMBOBOX:

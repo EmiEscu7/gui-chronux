@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional, Union
 import customtkinter as ctk
+import constants as ctes
 
 
 class Input(ABC):
@@ -11,7 +12,7 @@ class Input(ABC):
             width: int = 140,
             height: int = 28,
             corner_radius: Optional[int] = None,
-            fg_color: Union[Tuple[str, str], str] = 'transparent',
+            fg_color: Union[Tuple[str, str], str] = ctes.BG_COLOR,
             text_color: Optional[Union[Tuple[str, str], str]] = None,
             font: Optional[Union[tuple, ctk.CTkFont]] = None,
             state: str = 'normal',

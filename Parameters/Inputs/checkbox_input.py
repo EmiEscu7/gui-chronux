@@ -2,6 +2,7 @@ from typing import Tuple, Optional, Union, Callable
 from Parameters.Inputs.input import Input
 import customtkinter as ctk
 import tkinter as tk
+import constants as ctes
 
 
 class CheckboxInput(Input):
@@ -11,8 +12,8 @@ class CheckboxInput(Input):
             master,
             width: int = 140,
             height: int = 28,
-            corner_radius: Optional[int] = None,
-            fg_color: Union[Tuple[str, str], str] = 'transparent',
+            corner_radius: Optional[int] = 0,
+            fg_color: Union[Tuple[str, str], str] = ctes.BG_COLOR,
             text_color: Optional[Union[Tuple[str, str], str]] = None,
             font: Optional[Union[tuple, ctk.CTkFont]] = None,
             state: str = 'normal',
@@ -44,8 +45,6 @@ class CheckboxInput(Input):
         self._variable = variable
         self._onvalue = onvalue
         self._offvalue = offvalue
-
-
 
     def get_item(self) -> ctk.CTkCheckBox:
         return ctk.CTkCheckBox(

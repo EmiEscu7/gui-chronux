@@ -36,6 +36,7 @@ class PSDAnalysis(Analysis):
     def load_analysis(self, info_file: LFPFile) -> None:
         self._load_default_params(info_file)
         signals = (ctes.COMBOBOX, 'Signal', info_file.signals, self.default_values['signal'])
+        check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
@@ -44,7 +45,7 @@ class PSDAnalysis(Analysis):
         idx2 = (ctes.COMBOBOX, 'Time 2', info_file.times, self.default_values['time2'])
 
         self._info_file = info_file
-        self.parameters = PSDParameters(signals, taper1, taper2, fs, freqs, idx1, idx2)
+        self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
 
     def _as_tuple(self, datos):
         return [(dato) for dato in datos]
