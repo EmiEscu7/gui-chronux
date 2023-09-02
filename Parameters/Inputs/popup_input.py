@@ -4,6 +4,7 @@ import customtkinter as ctk
 import tkinter as tk
 import constants as ctes
 from Utils.PopupBuscador import PopupBuscador
+from PIL import Image
 
 
 class PopupInput(Input):
@@ -64,14 +65,20 @@ class PopupInput(Input):
         )
         label.pack(side=tk.LEFT)
 
+        search_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/icon_search.png'),
+            dark_image=Image.open('./assets/icon_search.png'),
+            size=(25, 25)
+        )
+
         btn_popup = ctk.CTkButton(
             master=frame,
-            width=int(self.width/2)-25,
-            # anchor=ctk.N,
+            width=10,
             fg_color=ctes.LIGHT_BLUE_DARK,
             text_color=ctes.BLACK,
             text_color_disabled=ctes.WITHE,
-            text='Open Popup',
+            text='',
+            image=search_icon,
             border_width=1,
             border_color=ctes.BLACK,
             corner_radius=15,
