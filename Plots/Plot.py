@@ -1,5 +1,6 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import  matplotlib.pyplot as plt
 import constants as ctes
 import customtkinter as ctk
 
@@ -28,6 +29,15 @@ class Plot:
         canvas.get_tk_widget().pack()
         canvas.draw()
         cls._tabview.set(title)
+
+    def get_plot(cls, x, y, xlabel, ylabel, title_plot, title, path) -> None:
+        plt.plot(x, y)
+        plt.title(title_plot, fontsize=16)
+        plt.xlabel(xlabel, fontsize=12)
+        plt.ylabel(ylabel, fontsize=12)
+
+        plt.savefig(path)
+        plt.clf()
 
     def get_frame(cls, master) -> ctk.CTkFrame:
         frame = ctk.CTkFrame(

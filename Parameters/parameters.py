@@ -49,7 +49,7 @@ class Parameters(ABC):
                     text_color=ctes.BLACK,
                     text=atr[1],
                     textvariable=tk.StringVar(value=atr[1]),
-                    variable=tk.IntVar(value=atr[2]),
+                    variable=self._dict_checks[atr[1]],
                     font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
                     checkbox_width=ctes.INPUT_WIDTH_CHECK,
                     checkbox_height=ctes.INPUT_HEIGHT_CHECK,
@@ -57,6 +57,8 @@ class Parameters(ABC):
                     hover_color=ctes.BLACK,
                     border_color=ctes.BLACK,
                     border_width=1,
+                    onvalue=True,
+                    offvalue=False,
                 )
                 self._dict_checks[atr[1]].set(atr[3])
                 check = chkbox.get_item()

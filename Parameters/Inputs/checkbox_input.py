@@ -27,7 +27,7 @@ class CheckboxInput(Input):
             textvariable: Optional[tk.StringVar] = None,
             hover: Optional[bool] = False,
             command: Union[Callable[[], None], None] = None,
-            variable: Optional[Union[tk.IntVar, tk.StringVar]] = None,
+            variable: Optional[Union[tk.IntVar, tk.StringVar, tk.BooleanVar]] = None,
             onvalue: Optional[Union[str, int]] = None,
             offvalue: Optional[Union[str, int]] = None,
     ):
@@ -41,10 +41,10 @@ class CheckboxInput(Input):
         self._text = text
         self._textvariable = textvariable
         self._hover = hover
-        self._command = command
         self._variable = variable
         self._onvalue = onvalue
         self._offvalue = offvalue
+        self._command = command
 
     def get_item(self) -> ctk.CTkCheckBox:
         return ctk.CTkCheckBox(

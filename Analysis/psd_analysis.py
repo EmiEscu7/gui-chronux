@@ -8,6 +8,11 @@ import json
 import numpy as np
 import os
 from Plots.Plot import Plot
+from pptx import Presentation
+from pptx.chart.data import ChartData
+from pptx.enum.chart import XL_CHART_TYPE
+from pptx.util import Inches
+
 
 
 class PSDAnalysis(Analysis):
@@ -17,6 +22,8 @@ class PSDAnalysis(Analysis):
         self._file_name = 'analysis'
         self._number_session = 0
         self._path_persist = './Persist/Parameters/psd_default.json'
+        self._presentation = None
+        self._export_data_path = './ExportData/PSD'
 
     def _load_default_params(self, info_file):
         try:
@@ -35,14 +42,14 @@ class PSDAnalysis(Analysis):
 
     def load_analysis(self, info_file: LFPFile) -> None:
         self._load_default_params(info_file)
-        signals = (ctes.COMBOBOX, 'Signal', info_file.signals, self.default_values['signal'])
+        signals = (ctes.POPUP, ('Signal'), info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
         freqs = (ctes.POPUP, ('Frequency'), self._as_tuple(info_file.frequencies), self.default_values['freq'])
-        idx1 = (ctes.COMBOBOX, 'Time 1', info_file.times, self.default_values['time1'])
-        idx2 = (ctes.COMBOBOX, 'Time 2', info_file.times, self.default_values['time2'])
+        idx1 = (ctes.POPUP, ('Time 1'), info_file.times, self.default_values['time1'])
+        idx2 = (ctes.POPUP, ('Time 2'), info_file.times, self.default_values['time2'])
 
         self._info_file = info_file
         self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
@@ -58,10 +65,20 @@ class PSDAnalysis(Analysis):
     def get_value_parameters(self) -> Dict:
         return self.parameters.get_data_params()
 
+    def _generate_all(self, taper1, taper2, fs, freq, time1, time2):
+        for signal, label in enumerate(self._info_file.signals):
+            # signal = self._info_file.signals.index(label)
+            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
+            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            if res == 1:
+                self._generate_pptx(f"{label} - Spectral Power Density (PSD)", label)
+
+        if self._presentation is not None:
+            self._presentation.save(f'{self._export_data_path}/{self._info_file.file_name}.pptx')
+            self._presentation = None
+
     def generate(self) -> None:
         data = self.get_value_parameters()
-        str_signal = data['signal']
-        signal = self._info_file.signals.index(str_signal)
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
@@ -71,11 +88,16 @@ class PSDAnalysis(Analysis):
         time1 = self._info_file.times.index(str_time1)
         str_time2 = data['time2']
         time2 = self._info_file.times.index(str_time2)
-
-        signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
-        res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
-        if res == 1:
-            self._generate_plot()
+        all_signals = data['all']
+        if all_signals:
+            self._generate_all(taper1, taper2, fs, freq, time1, time2)
+        else:
+            str_signal = data['signal']
+            signal = self._info_file.signals.index(str_signal)
+            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
+            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            if res == 1:
+                self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
 
     def _get_signal_data(self, signal, freq, time1, time2, n) -> List[str]:
         data_in_freq = self._info_file.nex.iloc[freq]
@@ -103,7 +125,7 @@ class PSDAnalysis(Analysis):
         result = float(decode.strip())
         return result
 
-    def _generate_plot(self) -> None:
+    def _generate_plot(self, title) -> None:
         file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
         # Open file in read mode
         with open(file, 'r') as f:
@@ -121,8 +143,7 @@ class PSDAnalysis(Analysis):
 
         # show plot
         self._number_session += 1
-        Plot().add_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)',
-                        f"{self._number_session} - Spectral Power Density (PSD)")
+        Plot().add_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)', title)
 
     def save_params(self) -> None:
         data = self.get_value_parameters()
@@ -151,3 +172,37 @@ class PSDAnalysis(Analysis):
         self.parameters.destroy()
         for box in self.boxes:
             box.destroy()
+
+    def _generate_pptx(self, title, label):
+        if self._presentation is None:
+            self._presentation = Presentation()
+
+        file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
+        with open(file, 'r') as f:
+            # read file content
+            content = f.read()
+
+            # decdoe content ot json format
+            data = json.loads(content)
+
+        os.remove(file)
+
+        # get data
+        psd = data['psd']
+        f = data['f']
+        path_img = f"{self._export_data_path}/{label}.png"
+        Plot().get_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)', title, path_img)
+
+        layout = self._presentation.slide_layouts[5]
+        slide = self._presentation.slides.add_slide(layout)
+
+        slide.shapes.title.text = label
+
+        # Add the plot image to the slide
+        left = Inches(1.5)  # Adjust the positioning as needed
+        top = Inches(1.5)
+        height = Inches(5)
+        slide.shapes.add_picture(path_img, left, top, height=height)
+        os.remove(path_img)
+
+
