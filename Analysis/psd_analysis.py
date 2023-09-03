@@ -9,8 +9,6 @@ import numpy as np
 import os
 from Plots.Plot import Plot
 from pptx import Presentation
-from pptx.chart.data import ChartData
-from pptx.enum.chart import XL_CHART_TYPE
 from pptx.util import Inches
 
 
