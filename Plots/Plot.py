@@ -3,6 +3,8 @@ from matplotlib.figure import Figure
 import  matplotlib.pyplot as plt
 import constants as ctes
 import customtkinter as ctk
+import tkinter as tk
+from PIL import Image
 
 
 class Plot:
@@ -11,8 +13,8 @@ class Plot:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(Plot, cls).__new__(cls)
-            cls._plots = []
             cls._tabview = None
+            cls._plots = {}
         return cls._instance
 
     def add_plot(cls, x, y, xlabel, ylabel, title_plot, title) -> None:
@@ -28,6 +30,7 @@ class Plot:
         canvas = FigureCanvasTkAgg(fig, master=cls._tabview.tab(title))
         canvas.get_tk_widget().pack()
         canvas.draw()
+        cls._plots[title] = [ax, canvas]
         cls._tabview.set(title)
 
     def get_plot(cls, x, y, xlabel, ylabel, title_plot, title, path) -> None:
@@ -62,3 +65,139 @@ class Plot:
         cls._tabview.pack()
 
         return frame
+
+    # Function to zoom in
+    def zoom_in(cls):
+        ax, canvas = cls._plots[cls._tabview.get()]
+        ax.set_xlim(ax.get_xlim()[0] * 0.9, ax.get_xlim()[1] * 0.9)
+        ax.set_ylim(ax.get_ylim()[0] * 0.9, ax.get_ylim()[1] * 0.9)
+        canvas.draw()
+
+    # Function to zoom out
+    def zoom_out(cls):
+        ax, canvas = cls._plots[cls._tabview.get()]
+        ax.set_xlim(ax.get_xlim()[0] * 1.1, ax.get_xlim()[1] * 1.1)
+        ax.set_ylim(ax.get_ylim()[0] * 1.1, ax.get_ylim()[1] * 1.1)
+        canvas.draw()
+
+    # Function to move left in the plot
+    def move_left(cls):
+        ax, canvas = cls._plots[cls._tabview.get()]
+        ax.set_xlim(ax.get_xlim()[0] - 1, ax.get_xlim()[1] - 1)
+        canvas.draw()
+
+    # Function to move right in the plot
+    def move_right(cls):
+        ax, canvas = cls._plots[cls._tabview.get()]
+        ax.set_xlim(ax.get_xlim()[0] + 1, ax.get_xlim()[1] + 1)
+        canvas.draw()
+
+    # Function to move up in the plot
+    def move_up(cls):
+        ax, canvas = cls._plots[cls._tabview.get()]
+        ax.set_ylim(ax.get_ylim()[0] + 1, ax.get_ylim()[1] + 1)
+        canvas.draw()
+
+    # Function to move down in the plot
+    def move_down(cls):
+        ax, canvas = cls._plots[cls._tabview.get()]
+        ax.set_ylim(ax.get_ylim()[0] - 1, ax.get_ylim()[1] - 1)
+        canvas.draw()
+
+    def get_controls(cls, master):
+        zoom_in_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/zoom_in_icon.png'),
+            dark_image=Image.open('./assets/zoom_in_icon.png'),
+            size=(20, 20)
+        )
+        zoom_in_button = ctk.CTkButton(
+            master=master,
+            text="",
+            fg_color='transparent',
+            border_width=0,
+            width=25,
+            image=zoom_in_icon,
+            command=cls.zoom_in
+        )
+
+        zoom_out_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/zoom_out_icon.png'),
+            dark_image=Image.open('./assets/zoom_out_icon.png'),
+            size=(20, 20)
+        )
+        zoom_out_button = ctk.CTkButton(
+            master=master,
+            text="",
+            fg_color='transparent',
+            border_width=0,
+            width=25,
+            image=zoom_out_icon,
+            command=cls.zoom_out
+        )
+
+        left_arrow_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/left_arrow_icon.png'),
+            dark_image=Image.open('./assets/left_arrow_icon.png'),
+            size=(20, 20)
+        )
+        move_left_button = ctk.CTkButton(
+            master=master,
+            text="",
+            fg_color='transparent',
+            border_width=0,
+            width=25,
+            image=left_arrow_icon,
+            command=cls.move_left
+        )
+
+        right_arrow_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/rigth_arrow_icon.png'),
+            dark_image=Image.open('./assets/rigth_arrow_icon.png'),
+            size=(20, 20)
+        )
+        move_right_button = ctk.CTkButton(
+            master=master,
+            text="",
+            fg_color='transparent',
+            border_width=0,
+            width=25,
+            image=right_arrow_icon,
+            command=cls.move_right
+        )
+
+        up_arrow_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/up_arrow_icon.png'),
+            dark_image=Image.open('./assets/up_arrow_icon.png'),
+            size=(20, 20)
+        )
+        move_up_button = ctk.CTkButton(
+            master=master,
+            text="",
+            fg_color='transparent',
+            border_width=0,
+            width=25,
+            image=up_arrow_icon,
+            command=cls.move_up
+        )
+
+        down_arrow_icon = ctk.CTkImage(
+            light_image=Image.open('./assets/down_arrow_icon.png'),
+            dark_image=Image.open('./assets/down_arrow_icon.png'),
+            size=(20, 20)
+        )
+        move_down_button = ctk.CTkButton(
+            master=master,
+            text="",
+            fg_color='transparent',
+            border_width=0,
+            width=25,
+            image=down_arrow_icon,
+            command=cls.move_down
+        )
+
+        zoom_in_button.pack(side=tk.LEFT)
+        zoom_out_button.pack(side=tk.LEFT)
+        move_left_button.pack(side=tk.LEFT)
+        move_right_button.pack(side=tk.LEFT)
+        move_up_button.pack(side=tk.LEFT)
+        move_down_button.pack(side=tk.LEFT)

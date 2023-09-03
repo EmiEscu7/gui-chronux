@@ -6,7 +6,7 @@ from PIL import Image
 import constants as ctes
 from Plots.Plot import Plot
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab
-from Utils.PopupBuscador import PopupBuscador
+import tkinter as tk
 
 
 class GUI:
@@ -89,6 +89,7 @@ class GUI:
         self._plot_section = Plot().get_frame(app)
         self._plot_section.pack()
         self._plot_section.place(relx=0.25, rely=0.1, anchor=ctk.NW)
+        Plot().get_controls(self._plot_section)
 
         """
             FRAME TO EXPORT DATA IN DIFFERENTS FORMATS
