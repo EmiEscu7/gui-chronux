@@ -75,9 +75,9 @@ class LFPFile(InfoFile):
         return freqs
     
     def show_info(self) -> List[Tuple[str, any]]:
-        info = [('Name', self.file_name), ('Size', self.size_file), ('Date', self.date_file),
-                ('Min. Frequency', self.min_freq), ('Max. Frequency', self.max_freq),
-                ('Duration', self.duration), ('Number Signals', self.number_of_signals)]
+        info = [('Name', self.file_name), ('Size', f"{self.size_file} MB"), ('Date', self.date_file),
+                ('Min. Frequency', f"{self.min_freq} Hz"), ('Max. Frequency', f"{self.max_freq} HZ"),
+                ('Duration', f"{self.duration} s"), ('Number Signals', self.number_of_signals)]
         return info
 
     @property
