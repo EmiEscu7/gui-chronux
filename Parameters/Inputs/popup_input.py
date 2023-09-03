@@ -54,16 +54,28 @@ class PopupInput(Input):
             fg_color=self.fg_color,
         )
 
-        label = ctk.CTkLabel(
+        label_placeholder = ctk.CTkLabel(
+            master=frame,
+            width=int(self.width/3)-10,
+            height=self.height,
+            text=self._placeholder_text,
+            text_color=self.text_color,
+            corner_radius=0,
+            justify='left',
+            font=self.font
+        )
+        label_placeholder.grid(row=0, column=0)
+
+        label_value = ctk.CTkLabel(
             master=frame,
             textvariable=self._textvariable,
-            width=int(self.width/2)-25,
+            width=int(self.width/3)-25,
             height=self.height,
             corner_radius=0,
             fg_color='transparent',
             text_color=ctes.BLACK,
         )
-        label.pack(side=tk.LEFT)
+        label_value.grid(row=0, column=1)
 
         search_icon = ctk.CTkImage(
             light_image=Image.open('./assets/icon_search.png'),
@@ -79,12 +91,12 @@ class PopupInput(Input):
             text_color_disabled=ctes.WITHE,
             text='',
             image=search_icon,
-            border_width=1,
+            border_width=0,
             border_color=ctes.BLACK,
             corner_radius=15,
             command=self._open_popup,
             font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
         )
-        btn_popup.pack(padx=10)
+        btn_popup.grid(row=0, column=2)
 
         return frame

@@ -78,6 +78,7 @@ class Parameters(ABC):
                     dropdown_font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
                     values=self.as_str(atr[2]),
                     variable=self._dict_combo[atr[1]],
+                    placeholder_text=atr[1],
                 )
                 self._dict_combo[atr[1]].set(atr[3])
                 combo = cmbbox.get_item()
@@ -110,6 +111,7 @@ class Parameters(ABC):
                     fg_color=ctes.LIGHT_BLUE_DARK,
                     border_width=2,
                     border_color=ctes.BLACK,
+                    placeholder_text=atr[1],
                 )
                 textbox = txtbox.get_item()
                 params.append(textbox)

@@ -26,6 +26,7 @@ class EntryInput(Input):
         self._placeholder_text = placeholder_text
 
     def get_item(self) -> ctk.CTkFrame:
+
         frame = ctk.CTkFrame(
             master=self.master,
             width=self.width,

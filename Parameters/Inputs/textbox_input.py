@@ -22,6 +22,7 @@ class TextboxInput(Input):
             scrollbar_button_hover_color: Union[Tuple[str, str], str] = None,
             activate_scrollbars: bool = False,
             wrap: str = 'char',
+            placeholder_text: Optional[str] = None
     ):
         super().__init__(master, width, height,corner_radius,fg_color,text_color,font,state)
         self._border_width = border_width
@@ -31,10 +32,33 @@ class TextboxInput(Input):
         self._scrollbar_button_hover_color = scrollbar_button_hover_color
         self._activate_scrollbars = activate_scrollbars
         self._wrap = wrap
+        self._placeholder_text = placeholder_text
 
-    def get_item(self) -> ctk.CTkTextbox:
-        return ctk.CTkTextbox(
+    def get_item(self) -> ctk.CTkFrame:
+
+        frame = ctk.CTkFrame(
             master=self.master,
+            width=self.width,
+            height=self.height,
+            fg_color='transparent',
+            border_width=0,
+            corner_radius=0,
+        )
+
+        label = ctk.CTkLabel(
+            master=frame,
+            width=int(self.width / 2) - 10,
+            height=self.height,
+            text=self._placeholder_text,
+            text_color=self.text_color,
+            corner_radius=0,
+            justify='left',
+            font=self.font
+        )
+        label.grid(row=0, column=0)
+
+        textbox = ctk.CTkTextbox(
+            master=frame,
             width=self.width,
             height=self.height,
             corner_radius=self.corner_radius,
@@ -50,3 +74,6 @@ class TextboxInput(Input):
             state=self.state,
             wrap=self._wrap,
         )
+        textbox.grid(row=0, column=1)
+
+        return frame

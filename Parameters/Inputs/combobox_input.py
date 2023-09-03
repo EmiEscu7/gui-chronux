@@ -30,6 +30,7 @@ class ComboboxInput(Input):
             command: Union[Callable[[], None], None] = None,
             variable: Optional[tk.StringVar] = None,
             justify: str = 'left',
+            placeholder_text: Optional[str] = None
     ):
         super().__init__(master, width, height, corner_radius, fg_color, text_color, font, state)
         self._border_width = border_width
@@ -46,10 +47,33 @@ class ComboboxInput(Input):
         self._command = command
         self._variable = variable
         self._justify = justify
+        self._placeholder_text = placeholder_text
 
-    def get_item(self) -> ctk.CTkComboBox:
-        return ctk.CTkComboBox(
+    def get_item(self) -> ctk.CTkFrame:
+
+        frame = ctk.CTkFrame(
             master=self.master,
+            width=self.width,
+            height=self.height,
+            fg_color='transparent',
+            border_width=0,
+            corner_radius=0,
+        )
+
+        label = ctk.CTkLabel(
+            master=frame,
+            width=int(self.width / 2) - 10,
+            height=self.height,
+            text=self._placeholder_text,
+            text_color=self.text_color,
+            corner_radius=0,
+            justify='left',
+            font=self.font
+        )
+        label.grid(row=0, column=0)
+
+        combo = ctk.CTkComboBox(
+            master=frame,
             width=self.width,
             height=self.height,
             corner_radius=self.corner_radius,
@@ -72,3 +96,6 @@ class ComboboxInput(Input):
             variable=self._variable,
             justify=self._justify,
         )
+        combo.grid(row=0, column=1)
+
+        return frame
