@@ -1,9 +1,10 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-import  matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import constants as ctes
 import customtkinter as ctk
 import tkinter as tk
+import numpy as np
 from PIL import Image
 
 
@@ -17,7 +18,28 @@ class Plot:
             cls._plots = {}
         return cls._instance
 
-    def add_plot(cls, x, y, xlabel, ylabel, title_plot, title) -> None:
+    def add_color_plot(cls, t, f, s, xlabel, ylabel, title_plot, tab_title):
+        fig = Figure(figsize=(7,6), dpi=100)
+        ax = fig.add_subplot(111)
+
+        pcm = ax.pcolormesh(t, f, np.transpose(s))
+        plt.colorbar(pcm, ax=ax, label='dB')
+        ax.set_xlabel(xlabel, fontsize=12)
+        ax.set_ylabel(ylabel, fontsize=12)
+        ax.set_title(title_plot, fontsize=16)
+        # ax.invert_yaxis()
+
+        cls._add_plot_in_tab(fig, ax, tab_title)
+
+    def _add_plot_in_tab(cls, fig, ax, tab_title):
+        cls._tabview.add(tab_title)
+        canvas = FigureCanvasTkAgg(fig, master=cls._tabview.tab(tab_title))
+        canvas.get_tk_widget().pack()
+        canvas.draw()
+        cls._plots[tab_title] = [ax, canvas]
+        cls._tabview.set(tab_title)
+
+    def add_line_plot(cls, x, y, xlabel, ylabel, title_plot, title) -> None:
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
 
@@ -26,18 +48,24 @@ class Plot:
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
 
-        cls._tabview.add(title)
-        canvas = FigureCanvasTkAgg(fig, master=cls._tabview.tab(title))
-        canvas.get_tk_widget().pack()
-        canvas.draw()
-        cls._plots[title] = [ax, canvas]
-        cls._tabview.set(title)
+        cls._add_plot_in_tab(fig, ax, title)
 
-    def get_plot(cls, x, y, xlabel, ylabel, title_plot, title, path) -> None:
+    def get_line_plot(cls, x, y, xlabel, ylabel, title_plot, path) -> None:
         plt.plot(x, y)
         plt.title(title_plot, fontsize=16)
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
+
+        plt.savefig(path)
+        plt.clf()
+
+    def get_color_plot(self, t, f, s, xlabel, ylabel, title_plot, path) -> None:
+        plt.pcolormesh(t, f, np.transpose(s))
+        plt.colorbar(label='dB')
+        plt.xlabel(xlabel, fontsize=12)
+        plt.ylabel(ylabel, fontsize=12)
+        plt.title(title_plot, fontsize=16)
+        # plt.gca().invert_yaxis()
 
         plt.savefig(path)
         plt.clf()

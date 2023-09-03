@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
+import constants as ctes
+import subprocess
 
 
 class Analysis(ABC):
@@ -65,3 +67,26 @@ class Analysis(ABC):
     @abstractmethod
     def destroy(self) -> None:
         pass
+
+    def as_tuple(self, datos):
+        return [(dato) for dato in datos]
+
+    def show_params(self, master) -> None:
+        self.boxes = self.parameters.load_params(master, [])
+        for param in self.boxes:
+            param.pack(padx=ctes.PADX_INPUTS, pady=ctes.PADY_INPUTS)
+
+    def get_value_parameters(self) -> Dict:
+        return self.parameters.get_data_params()
+
+    def analysis(self, command) -> float:
+        process = subprocess.Popen(['matlab', '-batch', f"disp({command})"], stdout=subprocess.PIPE)
+
+        output = process.communicate()[0]
+        decode = output.decode()
+        if "ERROR" in decode:
+            print(decode)
+            return 0.0
+        result = float(decode.strip())
+        return result
+

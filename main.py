@@ -1,12 +1,12 @@
 import customtkinter as ctk
 from typing import List, Tuple
 from Analysis.psd_analysis import PSDAnalysis
+from Analysis.spectogram_analysis import SpectogramAnalysis
 from Files.file import File
 from PIL import Image
 import constants as ctes
 from Plots.Plot import Plot
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab
-import tkinter as tk
 
 
 class GUI:
@@ -35,6 +35,10 @@ class GUI:
             self._analysis.destroy()
         if choice == 'PSD Analysis':
             self._analysis = PSDAnalysis()
+            self._analysis.load_analysis(self._load_files.info_file)
+            self._analysis.show_params(self._frame_params)
+        if choice == 'Spectogram Analysis':
+            self._analysis = SpectogramAnalysis()
             self._analysis.load_analysis(self._load_files.info_file)
             self._analysis.show_params(self._frame_params)
 
@@ -66,7 +70,7 @@ class GUI:
         """
         self._frame_params = frame_parameters(app, self.command_function_btn, self.callback_save_params)
         self._frame_params.pack()
-        self._frame_params.place(relx=0.01, rely=0.25, anchor=ctk.NW)
+        self._frame_params.place(relx=0.01, rely=0.20, anchor=ctk.NW)
 
         """
             TYPE ANALYSIS SECTION
@@ -95,109 +99,110 @@ class GUI:
             FRAME TO EXPORT DATA IN DIFFERENTS FORMATS
         """
 
-        def on_enter_pdf(e):
-            btn_pdf.configure(image=pdf_icon_color)
-
-        def on_leave_pdf(e):
-            btn_pdf.configure(image=pdf_icon)
-
-        def on_enter_excel(e):
-            btn_excel.configure(image=excel_icon_color)
-
-        def on_leave_excel(e):
-            btn_excel.configure(image=excel_icon)
-
-        def on_enter_gif(e):
-            btn_gif.configure(image=gif_icon_color)
-
-        def on_leave_gif(e):
-            btn_gif.configure(image=gif_icon)
-
-        frame_data_export = ctk.CTkFrame(
-            master=app,
-            width=300,
-            height=120,
-            fg_color='transparent',
-            corner_radius=0,
-            border_width=10,
-            border_color=ctes.GRAY_COLOR
-        )
-        frame_data_export.pack()
-        frame_data_export.place(relx=0.01, rely=0.82, anchor=ctk.NW)
-
-        pdf_icon = ctk.CTkImage(
-            light_image=Image.open('./assets/pdf_icon.png'),
-            dark_image=Image.open('./assets/pdf_icon.png'),
-            size=(50, 50)
-        )
-
-        pdf_icon_color = ctk.CTkImage(
-            light_image=Image.open('./assets/pdf_icon_color.png'),
-            dark_image=Image.open('./assets/pdf_icon_color.png'),
-            size=(50, 50)
-        )
-        btn_pdf = ctk.CTkButton(
-            master=frame_data_export,
-            text='',
-            fg_color='transparent',
-            corner_radius=20,
-            border_width=0,
-            image=pdf_icon,
-            width=50,
-            hover=False
-        )
-        btn_pdf.pack()
-        btn_pdf.pack(side=ctk.LEFT)
-        btn_pdf.bind('<Enter>', on_enter_pdf)
-        btn_pdf.bind('<Leave>', on_leave_pdf)
-
-        excel_icon = ctk.CTkImage(
-            light_image=Image.open('./assets/excel_icon.png'),
-            dark_image=Image.open('./assets/excel_icon.png'),
-            size=(50, 50)
-        )
-        excel_icon_color = ctk.CTkImage(
-            light_image=Image.open('./assets/excel_icon_color.png'),
-            dark_image=Image.open('./assets/excel_icon_color.png'),
-            size=(50, 50)
-        )
-        btn_excel = ctk.CTkButton(
-            master=frame_data_export,
-            text='',
-            fg_color='transparent',
-            corner_radius=20,
-            border_width=0,
-            width=50,
-            image=excel_icon,
-            hover=False
-        )
-        btn_excel.pack(side=ctk.LEFT)
-        btn_excel.bind('<Enter>', on_enter_excel)
-        btn_excel.bind('<Leave>', on_leave_excel)
-
-        gif_icon = ctk.CTkImage(
-            light_image=Image.open('./assets/gif_icon.png'),
-            dark_image=Image.open('./assets/gif_icon.png'),
-            size=(50, 50)
-        )
-        gif_icon_color = ctk.CTkImage(
-            light_image=Image.open('./assets/gif_icon_color.png'),
-            dark_image=Image.open('./assets/gif_icon_color.png'),
-            size=(50, 50)
-        )
-        btn_gif = ctk.CTkButton(
-            master=frame_data_export,
-            text='',
-            fg_color='transparent',
-            corner_radius=20,
-            border_width=0,
-            image=gif_icon,
-            hover=False,
-            width=50,
-        )
-        btn_gif.pack(side=ctk.LEFT)
-        btn_gif.bind('<Enter>', on_enter_gif)
-        btn_gif.bind('<Leave>', on_leave_gif)
+        # export module comment
+        # def on_enter_pdf(e):
+        #     btn_pdf.configure(image=pdf_icon_color)
+        #
+        # def on_leave_pdf(e):
+        #     btn_pdf.configure(image=pdf_icon)
+        #
+        # def on_enter_excel(e):
+        #     btn_excel.configure(image=excel_icon_color)
+        #
+        # def on_leave_excel(e):
+        #     btn_excel.configure(image=excel_icon)
+        #
+        # def on_enter_gif(e):
+        #     btn_gif.configure(image=gif_icon_color)
+        #
+        # def on_leave_gif(e):
+        #     btn_gif.configure(image=gif_icon)
+        #
+        # frame_data_export = ctk.CTkFrame(
+        #     master=app,
+        #     width=300,
+        #     height=120,
+        #     fg_color='transparent',
+        #     corner_radius=0,
+        #     border_width=10,
+        #     border_color=ctes.GRAY_COLOR
+        # )
+        # frame_data_export.pack()
+        # frame_data_export.place(relx=0.01, rely=0.82, anchor=ctk.NW)
+        #
+        # pdf_icon = ctk.CTkImage(
+        #     light_image=Image.open('./assets/pdf_icon.png'),
+        #     dark_image=Image.open('./assets/pdf_icon.png'),
+        #     size=(50, 50)
+        # )
+        #
+        # pdf_icon_color = ctk.CTkImage(
+        #     light_image=Image.open('./assets/pdf_icon_color.png'),
+        #     dark_image=Image.open('./assets/pdf_icon_color.png'),
+        #     size=(50, 50)
+        # )
+        # btn_pdf = ctk.CTkButton(
+        #     master=frame_data_export,
+        #     text='',
+        #     fg_color='transparent',
+        #     corner_radius=20,
+        #     border_width=0,
+        #     image=pdf_icon,
+        #     width=50,
+        #     hover=False
+        # )
+        # btn_pdf.pack()
+        # btn_pdf.pack(side=ctk.LEFT)
+        # btn_pdf.bind('<Enter>', on_enter_pdf)
+        # btn_pdf.bind('<Leave>', on_leave_pdf)
+        #
+        # excel_icon = ctk.CTkImage(
+        #     light_image=Image.open('./assets/excel_icon.png'),
+        #     dark_image=Image.open('./assets/excel_icon.png'),
+        #     size=(50, 50)
+        # )
+        # excel_icon_color = ctk.CTkImage(
+        #     light_image=Image.open('./assets/excel_icon_color.png'),
+        #     dark_image=Image.open('./assets/excel_icon_color.png'),
+        #     size=(50, 50)
+        # )
+        # btn_excel = ctk.CTkButton(
+        #     master=frame_data_export,
+        #     text='',
+        #     fg_color='transparent',
+        #     corner_radius=20,
+        #     border_width=0,
+        #     width=50,
+        #     image=excel_icon,
+        #     hover=False
+        # )
+        # btn_excel.pack(side=ctk.LEFT)
+        # btn_excel.bind('<Enter>', on_enter_excel)
+        # btn_excel.bind('<Leave>', on_leave_excel)
+        #
+        # gif_icon = ctk.CTkImage(
+        #     light_image=Image.open('./assets/gif_icon.png'),
+        #     dark_image=Image.open('./assets/gif_icon.png'),
+        #     size=(50, 50)
+        # )
+        # gif_icon_color = ctk.CTkImage(
+        #     light_image=Image.open('./assets/gif_icon_color.png'),
+        #     dark_image=Image.open('./assets/gif_icon_color.png'),
+        #     size=(50, 50)
+        # )
+        # btn_gif = ctk.CTkButton(
+        #     master=frame_data_export,
+        #     text='',
+        #     fg_color='transparent',
+        #     corner_radius=20,
+        #     border_width=0,
+        #     image=gif_icon,
+        #     hover=False,
+        #     width=50,
+        # )
+        # btn_gif.pack(side=ctk.LEFT)
+        # btn_gif.bind('<Enter>', on_enter_gif)
+        # btn_gif.bind('<Leave>', on_leave_gif)
 
         return app
 

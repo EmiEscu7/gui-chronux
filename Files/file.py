@@ -114,7 +114,7 @@ class File:
         btn = ctk.CTkButton(
             master=frame,
             width=ctes.WIDTH_LEFT_SIDE - 5,
-            height=165,
+            height=115,
             text='Select file',
             image=upload_file_img,
             fg_color='transparent',

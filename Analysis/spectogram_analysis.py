@@ -1,5 +1,5 @@
 from Analysis.analysis import Analysis
-from Parameters.psd_parameters import PSDParameters
+from Parameters.spectogram_parameters import SpectogramParameters
 from InfoFiles.lfp_file import LFPFile
 from typing import List, Dict
 import constants as ctes
@@ -10,16 +10,16 @@ from Plots.Plot import Plot
 from pptx import Presentation
 from pptx.util import Inches
 
+class SpectogramAnalysis(Analysis):
 
-class PSDAnalysis(Analysis):
     def __init__(self):
-        super().__init__('PSD Analysis')
+        super().__init__('Spectogram Analysis')
         self._info_file = None
         self._file_name = 'analysis'
         self._number_session = 0
-        self._path_persist = './Persist/Parameters/psd_default.json'
+        self._path_persist = './Persist/Parameters/spectogram_default.json'
         self._presentation = None
-        self._export_data_path = './ExportData/PSD'
+        self._export_data_path = './ExportData/Spectogram'
 
     def _load_default_params(self, info_file) -> None:
         try:
@@ -28,60 +28,77 @@ class PSDAnalysis(Analysis):
         except:
             self.default_values = {
                 'signal': info_file.signals[0],
-                'taper1': '3',
-                'taper2': '5',
+                'movingwin1': '0.05',
+                'movingwin2': '0.5',
+                'taper1': '5',
+                'taper2': '9',
                 'sample_freq': '200',
                 'freq': str(info_file.frequencies[0]),
                 'time1': info_file.times[0],
                 'time2': info_file.times[len(info_file.times) - 1],
+                'trialave': '0',
+                'err': '1',
             }
 
     def load_analysis(self, info_file: LFPFile) -> None:
         self._load_default_params(info_file)
         signals = (ctes.POPUP, ('Signal'), info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
+        movingwin1 = (ctes.ENTRY, 'Moving Window 1', '', self.default_values['movingwin1'])
+        movingwin2 = (ctes.ENTRY, 'Moving Window 2', '', self.default_values['movingwin2'])
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
         freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(info_file.frequencies), self.default_values['freq'])
-        idx1 = (ctes.POPUP, ('Time 1'), info_file.times, self.default_values['time1'])
-        idx2 = (ctes.POPUP, ('Time 2'), info_file.times, self.default_values['time2'])
+        freq_pass1 = (ctes.ENTRY, 'Frequency band 1', '', self.default_values['freq_pass1'])
+        freq_pass2 =(ctes.ENTRY, 'Frequency band 2', '', self.default_values['freq_pass2'])
+        time1 = (ctes.POPUP, ('Time 1'), info_file.times, self.default_values['time1'])
+        time2 = (ctes.POPUP, ('Time 2'), info_file.times, self.default_values['time2'])
+        trialave = (ctes.ENTRY, 'Trialave', '', self.default_values['trialave'])
+        err = (ctes.ENTRY, 'Error', '', self.default_values['err'])
 
         self._info_file = info_file
-        self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
+        self.parameters = SpectogramParameters(signals, check_all_signals, movingwin1, movingwin2, taper1, taper2, fs, freqs, freq_pass1, freq_pass2, time1, time2, trialave, err)
 
-    def _generate_all(self, taper1, taper2, fs, freq, time1, time2):
+
+    def _generate_all(self, mw1, mw2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
         for signal, label in enumerate(self._info_file.signals):
             signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
-            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            res = self.spectogram_analysis(signal_matrix, mw1, mw2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
-                self._generate_pptx(f"{label} - Spectral Power Density (PSD)", label)
+                self._generate_pptx(f"{label} - Spectogram Plot", label)
 
-        if self._presentation is not None:
-            self._presentation.save(f'{self._export_data_path}/{self._info_file.file_name}.pptx')
-            self._presentation = None
+            if self._presentation is not None:
+                self._presentation.save(f'{self._export_data_path}/{self._info_file.file_name}.pptx')
+                self._presentation = None
 
     def generate(self) -> None:
         data = self.get_value_parameters()
+        movingwin1 = data['movingwin1']
+        movingwin2 = data['movingwin2']
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
         str_freq = data['freq']
         freq = self._info_file.frequencies.index(str_freq) + 1
+        freq_pass1 = data['freq_pass1']
+        freq_pass2 = data['freq_pass2']
         str_time1 = data['time1']
         time1 = self._info_file.times.index(str_time1)
         str_time2 = data['time2']
         time2 = self._info_file.times.index(str_time2)
+        trialave = data['trialave']
+        err = data['err']
         all_signals = data['all']
         if all_signals:
-            self._generate_all(taper1, taper2, fs, freq, time1, time2)
+            self._generate_all(movingwin1, movingwin2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2, trialave, err)
         else:
             str_signal = data['signal']
             signal = self._info_file.signals.index(str_signal)
             signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
-            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
-                self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
+                self._generate_plot(f"{self._number_session} - Spectogram Plot")
 
     def _get_signal_data(self, signal, freq, time1, time2, n) -> List[str]:
         data_in_freq = self._info_file.nex.iloc[freq]
@@ -96,13 +113,16 @@ class PSDAnalysis(Analysis):
     def _get_range(self, i, car, n) -> int:
         return (2 + n * i) + car
 
-    def psd_analysis(self, signal, taper1, taper2, fs) -> float:
+    def spectogram_analysis(self, signal, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err):
         # Execute MATLAB in CMD and capture output
-        function = f"PSDAnalysis2({signal}, {taper1}, {taper2}, {fs}, '{ctes.FOLDER_RES + 'PSD/'}', '{self._file_name}')"
+        movingwin = f'[{movingwin1} {movingwin2}]'
+        tapers = f'[{taper1} {taper2}]'
+        fpass = f'[{freq_pass1} {freq_pass2}]'
+        function = f"SpectogramAnalysis({signal}, {movingwin}, {tapers}, {fpass}, {fs}, {err}, {trialave}, '{ctes.FOLDER_RES + 'Spectogram/'}', '{self._file_name}')"
         return self.analysis(function)
 
-    def _generate_plot(self, title) -> None:
-        file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
+    def _generate_plot(self, title):
+        file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
         # Open file in read mode
         with open(file, 'r') as f:
             # read file content
@@ -114,31 +134,44 @@ class PSDAnalysis(Analysis):
         os.remove(file)
 
         # get data
-        psd = data['psd']
+        s = data['S']
+        t = data['t']
         f = data['f']
 
         # show plot
         self._number_session += 1
-        Plot().add_line_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)', title)
+        Plot().add_color_plot(t, f, 10 * np.log10(s), 'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', title)
 
     def save_params(self) -> None:
         data = self.get_value_parameters()
         signal = data['signal']
+        movingwin1 = data['movingwin1']
+        movingwin2 = data['movingwin2']
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
         freq = data['freq']
+        freq_pass1 = data['freq_pass1']
+        freq_pass2 = data['freq_pass2']
         time1 = data['time1']
         time2 = data['time2']
+        trialave = data['trialave']
+        err = data['err']
 
         self.default_values = {
             'signal': signal,
+            'movingwin1': str(movingwin1),
+            'movingwin2': str(movingwin2),
             'taper1': str(taper1),
             'taper2': str(taper2),
             'sample_freq': str(fs),
             'freq': str(freq),
+            'freq_pass1': str(freq_pass1),
+            'freq_pass2': str(freq_pass2),
             'time1': str(time1),
             'time2': str(time2),
+            'trialave': str(trialave),
+            'err': str(err),
         }
 
         with open(self._path_persist, "w") as file:
@@ -153,7 +186,7 @@ class PSDAnalysis(Analysis):
         if self._presentation is None:
             self._presentation = Presentation()
 
-        file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
+        file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
         with open(file, 'r') as f:
             # read file content
             content = f.read()
@@ -164,10 +197,11 @@ class PSDAnalysis(Analysis):
         os.remove(file)
 
         # get data
-        psd = data['psd']
+        s = data['S']
+        t = data['t']
         f = data['f']
         path_img = f"{self._export_data_path}/{label}.png"
-        Plot().get_line_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)',
+        Plot().get_color_plot(t,f, 10 * np.log10(s),  'Time (s)', 'Frequency (Hz)', 'Signal Spectogram',
                         path_img)
 
         layout = self._presentation.slide_layouts[5]

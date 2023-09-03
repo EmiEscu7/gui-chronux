@@ -9,7 +9,7 @@ def frame_load_files(master) -> ctk.CTkFrame:
     frame = ctk.CTkFrame(
         master=master,
         width=ctes.WIDTH_LEFT_SIDE,
-        height=170,
+        height=120,
         fg_color='transparent',
         border_width=ctes.BORDER_WIDTH_FRAME,
         border_color=ctes.BORDER_COLOR,
