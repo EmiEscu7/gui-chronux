@@ -1,3 +1,5 @@
+import time
+
 import customtkinter as ctk
 from typing import List, Tuple
 from Analysis.psd_analysis import PSDAnalysis
@@ -6,6 +8,7 @@ from Files.file import File
 from PIL import Image
 import constants as ctes
 from Plots.Plot import Plot
+from Utils.loading import Loading
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab
 
 
@@ -56,6 +59,8 @@ class GUI:
 
         app = ctk.CTk()
         app.geometry(geometry)
+
+        # Loading(app, app.winfo_screenwidth(), app.winfo_screenheight())
 
         """
             BUTTON TO LOAD FILES
@@ -210,5 +215,6 @@ class GUI:
 if __name__ == '__main__':
     gui = GUI()
     app = gui.load_gui("1366x768")
+    Loading(app, 1366, 768)
     app.mainloop()
 

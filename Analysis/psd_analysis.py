@@ -9,6 +9,7 @@ import os
 from Plots.Plot import Plot
 from pptx import Presentation
 from pptx.util import Inches
+from Utils.loading import Loading
 
 
 class PSDAnalysis(Analysis):
@@ -62,6 +63,10 @@ class PSDAnalysis(Analysis):
             self._presentation = None
 
     def generate(self) -> None:
+        Loading().start(self.generate_th)
+
+
+    def generate_th(self) -> None:
         data = self.get_value_parameters()
         taper1 = data['taper1']
         taper2 = data['taper2']
@@ -82,6 +87,7 @@ class PSDAnalysis(Analysis):
             res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
             if res == 1:
                 self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
+        Loading().change_state()
 
     def _get_signal_data(self, signal, freq, time1, time2, n) -> List[str]:
         data_in_freq = self._info_file.nex.iloc[freq]

@@ -1,7 +1,7 @@
 from Analysis.analysis import Analysis
 from Parameters.spectogram_parameters import SpectogramParameters
 from InfoFiles.lfp_file import LFPFile
-from typing import List, Dict
+from typing import List
 import constants as ctes
 import json
 import numpy as np
@@ -9,6 +9,7 @@ import os
 from Plots.Plot import Plot
 from pptx import Presentation
 from pptx.util import Inches
+from Utils.loading import Loading
 
 class SpectogramAnalysis(Analysis):
 
@@ -73,6 +74,9 @@ class SpectogramAnalysis(Analysis):
                 self._presentation = None
 
     def generate(self) -> None:
+        Loading().start(self.generate_th)
+
+    def generate_th(self):
         data = self.get_value_parameters()
         movingwin1 = data['movingwin1']
         movingwin2 = data['movingwin2']
@@ -91,14 +95,19 @@ class SpectogramAnalysis(Analysis):
         err = data['err']
         all_signals = data['all']
         if all_signals:
-            self._generate_all(movingwin1, movingwin2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2, trialave, err)
+            self._generate_all(movingwin1, movingwin2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2,
+                               trialave, err)
         else:
             str_signal = data['signal']
             signal = self._info_file.signals.index(str_signal)
             signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
-            res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
+            res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1,
+                                           freq_pass2, trialave, err)
             if res == 1:
                 self._generate_plot(f"{self._number_session} - Spectogram Plot")
+
+        Loading().change_state()
+
 
     def _get_signal_data(self, signal, freq, time1, time2, n) -> List[str]:
         data_in_freq = self._info_file.nex.iloc[freq]

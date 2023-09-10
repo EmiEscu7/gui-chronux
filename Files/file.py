@@ -4,6 +4,7 @@ import tkinter as tk
 import constants as ctes
 from InfoFiles.lfp_file import LFPFile
 from PIL import Image
+from Utils.loading import Loading
 
 
 class File:
@@ -98,8 +99,13 @@ class File:
                 self._info_file = LFPFile(self._path)
             elif self._type_file == ctes.SPIKE_INT:
                 pass
+        Loading().start(self.last_step)
+
+
+    def last_step(self):
         if self._info_file is not None: self._info_file.extract_info()
         self._fn_show()
+        Loading().change_state()
 
     def load(self) -> None:
         self.select_type()
