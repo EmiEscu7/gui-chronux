@@ -18,15 +18,17 @@ def frame_load_files(master) -> ctk.CTkFrame:
     return frame
 
 
-def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.CTkFrame:
-    frame = ctk.CTkFrame(
+def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.CTkScrollableFrame:
+    frame = ctk.CTkScrollableFrame(
         master=master,
-        width=ctes.WIDTH_LEFT_SIDE,
+        width=ctes.WIDTH_LEFT_SIDE-20,
         height=400,
         fg_color='transparent',
         border_width=ctes.BORDER_WIDTH_FRAME,
         border_color=ctes.BORDER_COLOR,
         corner_radius=0,
+        scrollbar_button_color=ctes.GRAY_COLOR,
+        scrollbar_button_hover_color=ctes.LIGHT_GRAY_COLOR,
     )
 
     title = ctk.CTkLabel(

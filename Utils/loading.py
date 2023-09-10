@@ -56,7 +56,7 @@ class Loading:
 
             cls._lblVideo.configure(image=img)
             cls._lblVideo.image = img
-            cls._lblVideo.after(50, cls.show)
+            cls._lblVideo.after(50, cls._show)
 
         elif cls._is_active:
             cls._cap.release()
