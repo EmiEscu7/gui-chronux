@@ -9,6 +9,7 @@ from Plots.Plot import Plot
 from Utils.loading import Loading
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab, frame_multi_analysis
 import constants as ctes
+from Utils.popup_searcher_multiple import PopupSearcherMultiple
 
 
 class GUI:
@@ -243,6 +244,9 @@ class GUI:
 
         return app
 
+
+def callback_psm():
+    print("callback")
 
 if __name__ == '__main__':
     gui = GUI()

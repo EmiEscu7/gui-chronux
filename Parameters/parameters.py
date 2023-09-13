@@ -7,6 +7,7 @@ from Parameters.Inputs.radiobutton_input import RadiobuttonInput
 from Parameters.Inputs.textbox_input import TextboxInput
 from Parameters.Inputs.entry_input import EntryInput
 from Parameters.Inputs.popup_input import PopupInput
+from Parameters.Inputs.popup_multiple_input import PopupMultipleInput
 import constants as ctes
 import tkinter as tk
 
@@ -18,6 +19,7 @@ class Parameters(ABC):
         self._entries = {}
         self._popups = {}
         self._dict_checks = {}
+        self._popups_multiple = {}
 
     @property
     def dict_checks(self):
@@ -30,6 +32,10 @@ class Parameters(ABC):
     @property
     def popups(self):
         return self._popups
+
+    @property
+    def popups_multiple(self):
+        return self._popups_multiple
 
     @property
     def entries(self):
@@ -149,6 +155,23 @@ class Parameters(ABC):
                 self._popups[atr[1]].set(atr[3])
                 popup_input = popup.get_item()
                 params.append(popup_input)
+            elif input_type == ctes.POPUP_MULTIPLE:
+                self._popups_multiple[atr[1]] = tk.StringVar(value=atr[3])
+                popup_m = PopupMultipleInput(
+                    master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
+                    corner_radius=0,
+                    text_color=ctes.BLACK,
+                    font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
+                    fg_color=ctes.LIGHT_BLUE_DARK,
+                    placeholder_text=atr[1],
+                    textvariable=self._popups_multiple[atr[1]],
+                    values=self.as_str(atr[2]),
+                )
+                self._popups_multiple[atr[1]].set(atr[3])
+                popup_m_input = popup_m.get_item()
+                params.append(popup_m_input)
 
         return params
 
@@ -163,3 +186,4 @@ class Parameters(ABC):
         self._dict_combo = {}
         self._popups = {}
         self._entries = {}
+        self._popups_multiple = {}

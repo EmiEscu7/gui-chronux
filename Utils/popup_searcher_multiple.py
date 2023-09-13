@@ -1,33 +1,40 @@
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import ttk
 import constants as ctes
-class PopupBuscador:
 
-    def __init__(self, datos, columnas, callback):
+class PopupSearcherMultiple:
+
+    def __init__(self, datos, callback):
         self._datos = datos
-        self._columnas = columnas
         self._variable = None
         self._table = None
+        self._elementos = {}
         self._callback = callback
 
     def _find(self) -> None:
+        for widget in self._table.winfo_children():
+            widget.destroy()
+
         found = []
         if self._variable.get() is not None and self._variable.get().strip() != "":
             to_find = self._variable.get().strip()
             for dato in self._datos:
                 filter = dato
-                if str(filter).startswith(to_find):
+                if str(to_find).lower() in str(filter).lower():
                     found.append(dato)
         else:
             found = self._datos
 
-        # Suponiendo que 'tabla' es tu objeto Treeview
-        self._table.delete(*self._table.get_children())
-        i = 0
+        self._elementos = {}
         for dato in found:
-            self._table.insert("", "end", text=str(i), values=dato)
-            i += 1
+            var = tk.BooleanVar()
+            check = ctk.CTkCheckBox(
+                master=self._table,
+                text=dato,
+                variable=var,
+            )
+            check.pack(anchor="w")
+            self._elementos[dato] = var
 
 
 
@@ -49,7 +56,7 @@ class PopupBuscador:
         )
         frame_info.pack(pady=ctes.PADY_BUTTON)
 
-        self._variable = tk.StringVar(value=f'Find by {self._columnas[0]}')
+        self._variable = tk.StringVar(value=f'Find')
         input = ctk.CTkEntry(
             master=frame_info,
             width=ctes.INPUT_WIDTH,
@@ -93,23 +100,25 @@ class PopupBuscador:
         )
         btn_select.pack(padx=20, pady=20)
 
-        self._table = ttk.Treeview(
-            master=frame,
-        )
-        self._table['columns']=self._columnas
-        self._table.heading("#0", text="#")
-        for columna in self._columnas:
-            self._table.heading(columna, text=columna)
-        self._table.pack(padx=20, pady=20)
+        self._table = ctk.CTkScrollableFrame(master=frame)
+        self._table.pack(padx=20, pady=20, fill="both", expand=True)
 
-        i = 0
         for dato in self._datos:
-            self._table.insert("", "end", text=str(i), values=dato)
-            i += 1
+            var = tk.BooleanVar()
+            check = ctk.CTkCheckBox(
+                master=self._table,
+                text=dato,
+                variable=var,
+            )
+            check.pack(padx=1, pady=5, anchor="w")
+            self._elementos[dato] = var
 
         return frame
 
 
     def _select_element(self):
-        selection = self._table.selection()
-        self._callback(self._table.item(selection[0], "values"))
+        seleccionados = []
+        for elemento, valor in self._elementos.items():
+            if valor.get():
+                seleccionados.append(elemento)
+        self._callback(seleccionados)

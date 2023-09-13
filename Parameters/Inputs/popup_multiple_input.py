@@ -3,11 +3,11 @@ from Parameters.Inputs.input import Input
 import customtkinter as ctk
 import tkinter as tk
 import constants as ctes
-from Utils.popup_searcher import PopupSearcher
+from Utils.popup_searcher_multiple import PopupSearcherMultiple
 from PIL import Image
 
 
-class PopupInput(Input):
+class PopupMultipleInput(Input):
 
     def __init__(
             self,
@@ -23,18 +23,17 @@ class PopupInput(Input):
             placeholder_text_color: Optional[Union[Tuple[str, str], str]] = None,
             placeholder_text: Optional[str] = None,
             values = None,
-            columns = None,
     ):
         super().__init__(master,width,height,corner_radius,fg_color,text_color,font,state)
         self._textvariable = textvariable
         self._placeholder_text_color = placeholder_text_color
         self._placeholder_text = placeholder_text
         self._values = values
-        self._columns = columns
         self._popup_window = None
 
-    def _dato_selected(self, selected):
-        self._textvariable.set(selected[0])
+    def _callback_select(self, selected):
+        seleccionados = ",".join(selected)
+        self._textvariable.set(seleccionados)
         self._popup_window.destroy()
 
     def _open_popup(self):
@@ -42,7 +41,7 @@ class PopupInput(Input):
         self._popup_window.title("Popup")
         self._popup_window.geometry("500x300")
         self._popup_window.wm_attributes("-topmost", True)
-        popup = PopupSearcher(self._values, self._columns, self._dato_selected)
+        popup = PopupSearcherMultiple(self._values, self._callback_select)
         popup.get_item(self._popup_window).pack()
 
     def get_item(self) -> ctk.CTkFrame:

@@ -32,7 +32,7 @@ class PSDParameters(Parameters):
 
     def get_data_params(self) -> Dict:
         return {
-            'signal': str(self._popups[self._signals[1]].get()),
+            'signal': str(self.popups_multiple[self._signals[1]].get()),
             'all': self.dict_checks[self._check_all_signals[1]].get(),
             'taper1': int(self.entries[self._taper1[1]].get()),
             'taper2': int(self.entries[self._taper2[1]].get()),

@@ -43,7 +43,7 @@ class PSDAnalysis(Analysis):
 
     def load_analysis(self) -> None:
         self._load_default_params(self._files.info_file)
-        signals = (ctes.POPUP, ('Signal'), self._files.info_file.signals, self.default_values['signal'])
+        signals = (ctes.POPUP_MULTIPLE, ('Signal'), self._files.info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
@@ -136,13 +136,23 @@ class PSDAnalysis(Analysis):
         if all_signals:
             self._generate_all(taper1, taper2, fs, freq, time1, time2)
         else:
-            str_signal = data['signal']
-            signal = self._files.info_file.signals.index(str_signal)
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._files.info_file.times))
-            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
-            if res == 1:
-                self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
-        Loading().change_state()
+            str_signal = str(data['signal'])
+            arr_signal = str_signal.split(",")
+            if len(arr_signal) == 1:
+                signal = self._files.info_file.signals.index(arr_signal[0].strip())
+                signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._files.info_file.times))
+                res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+                if res == 1:
+                    self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
+                Loading().change_state()
+            else:
+                for select_signal in arr_signal:
+                    signal = self._files.info_file.signals.index(select_signal.strip())
+                    signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._files.info_file.times))
+                    res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+                    if res == 1:
+                        self._save_data_temp(select_signal)
+                self._generate_plot_all_files()
 
     def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> List[str]:
         if file is None:
