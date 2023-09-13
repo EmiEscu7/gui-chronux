@@ -49,6 +49,9 @@ LFP_INT = 0
 SPIKE = 'Spike'
 SPIKE_INT = 1
 
+CURRENT_FILE = 0
+ALL_FILES = 1
+
 # INPUT TYPE
 CHECKBOX = 0
 COMBOBOX = 1
@@ -61,3 +64,6 @@ POPUP = 5
 MATLAB_SCRIPTS_PATH = '../matlab_scripts/'
 FOLDER_RES = './Data/'
 
+#ANALYSIS NAMES
+NAME_PSD = 'PSD Analysis'
+NAME_SPECTOGRAM = 'Spectogram Analysis'
