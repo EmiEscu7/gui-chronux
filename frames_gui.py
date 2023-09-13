@@ -130,7 +130,8 @@ def frame_info_file(master) -> ctk.CTkFrame:
     return frame
 
 
-def tabview_frame(master) -> ctk.CTkTabview:
+
+def tabview_frame(master, callback_change_tab) -> ctk.CTkTabview:
     tabview = ctk.CTkTabview(
         master=master,
         width=ctes.WIDTH_RIGHT_SIDE - 10,
@@ -142,6 +143,7 @@ def tabview_frame(master) -> ctk.CTkTabview:
         segmented_button_fg_color=ctes.LIGHT_GRAY_COLOR,
         text_color=ctes.BLACK,
         corner_radius=0,
+        command=callback_change_tab,
     )
     tabview.pack(padx=5, pady=5)
 
@@ -175,6 +177,69 @@ def get_frame_tab(master, data: List[Tuple[str, any]]) -> ctk.CTkFrame:
         label.pack(pady=ctes.PADY_LABELS)
 
     return frame
+
+def frame_multi_analysis(master, option, callback) -> ctk.CTkFrame:
+    frame = ctk.CTkFrame(
+        master=master,
+        width=master.cget('width'),
+        height=master.cget('height'),
+        fg_color='transparent',
+    )
+
+    label = ctk.CTkLabel(
+        master=frame,
+        text='Choose files to analyze:',
+        text_color=ctes.BLACK,
+        fg_color='transparent',
+        corner_radius=0,
+        anchor=ctk.NW,
+    )
+    label.cget("font").configure(family=ctes.FAMILY_FONT)
+    label.cget("font").configure(size=ctes.SUBTITLE_SIZE)
+    label.pack(padx=20, pady=5)
+
+    current_file_option = ctk.CTkRadioButton(
+        master=frame,
+        radiobutton_width=ctes.RB_WIDTH,
+        radiobutton_height=ctes.RB_HEIGHT,
+        text_color=ctes.BLACK,
+        text='Current file',
+        variable=option,
+        value=ctes.CURRENT_FILE,
+    )
+    current_file_option.pack(padx=1, pady=5)
+
+    all_files_option = ctk.CTkRadioButton(
+        master=frame,
+        radiobutton_width=ctes.RB_WIDTH,
+        radiobutton_height=ctes.RB_HEIGHT,
+        text_color=ctes.BLACK,
+        text='All files',
+        variable=option,
+        value=ctes.ALL_FILES,
+    )
+    all_files_option.pack(padx=1, pady=5)
+
+    btn = ctk.CTkButton(
+        master=frame,
+        width=ctes.RB_WIDTH,
+        text='Select',
+        fg_color='transparent',
+        corner_radius=0,
+        command=callback,
+        text_color=ctes.GRAY_COLOR,
+        hover_color=ctes.PINK_GRAY_COLOR,
+        border_width=ctes.BORDER_WIDTH_FRAME-1,
+        border_color=ctes.BORDER_COLOR,
+        anchor=ctk.NW
+    )
+    btn.cget("font").configure(family=ctes.FAMILY_FONT)
+    btn.cget("font").configure(size=20)
+    btn.pack()
+
+    return frame
+
+
 
 
 

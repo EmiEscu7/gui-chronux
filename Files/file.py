@@ -5,7 +5,7 @@ import constants as ctes
 from InfoFiles.lfp_file import LFPFile
 from PIL import Image
 from Utils.loading import Loading
-
+from InfoFiles.info_file import InfoFile
 
 class File:
     def __init__(self, fn_show):
@@ -13,6 +13,7 @@ class File:
         self._path = None
         self._type_file = self.INIT_OPTION_RB_TYPE_FILE.get()
         self._info_file = None
+        self._all_files = {}
         self._type_file_window = None
         self._fn_show = fn_show
 
@@ -92,20 +93,38 @@ class File:
         frame_sf.pack()
 
     def select_file(self) -> None:
+        self._info_file = None
         if self._type_file_window is not None: self._type_file_window.destroy()
         self._path = askopenfilename()
+        Loading().start(self.last_step)
+
+    @property
+    def info_file(self):
+        return self._info_file
+
+    def last_step(self):
         if self._path is not None and self._path != '':
             if self._type_file == ctes.LFP_INT:
                 self._info_file = LFPFile(self._path)
             elif self._type_file == ctes.SPIKE_INT:
                 pass
-        Loading().start(self.last_step)
-
-
-    def last_step(self):
-        if self._info_file is not None: self._info_file.extract_info()
+        if self._info_file is not None:
+            self._info_file.extract_info()
+            self._all_files[self._info_file.file_name] = self._info_file
         self._fn_show()
         Loading().change_state()
+
+    def change_current_file(self, name):
+        self._info_file = self._all_files[name]
+
+    def get_specific_file(self, name) -> InfoFile:
+        return self._all_files[name]
+
+    def cant_files(self):
+        return len(self._all_files)
+
+    def files(self):
+        return self._all_files
 
     def load(self) -> None:
         self.select_type()
@@ -132,7 +151,3 @@ class File:
         btn.cget("font").configure(family=ctes.FAMILY_FONT)
         btn.cget("font").configure(size=20)
         btn.place(relx=0.01, rely=0.02, anchor=ctk.NW)
-
-    @property
-    def info_file(self):
-        return self._info_file

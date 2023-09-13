@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+from Analysis.analysis import Analysis
+import constants as ctes
 
 
 class InfoFile(ABC):
@@ -8,6 +10,7 @@ class InfoFile(ABC):
         self._file_name = None
         self._size_file = None
         self._date_file = None
+        self._value_params = None
 
     @abstractmethod
     def extract_info(self) -> None:
@@ -40,3 +43,9 @@ class InfoFile(ABC):
     @date_file.setter
     def date_file(self, value):
         self._date_file = value
+
+    def set_parameters(self, analysis: Analysis) -> None:
+        self._value_params = analysis.get_value_parameters()
+
+    def get_parameters(self):
+        return self._value_params

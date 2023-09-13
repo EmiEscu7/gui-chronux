@@ -1,7 +1,7 @@
 from Analysis.analysis import Analysis
 from Parameters.psd_parameters import PSDParameters
-from InfoFiles.lfp_file import LFPFile
-from typing import List, Dict
+from Files.file import File
+from typing import List
 import constants as ctes
 import json
 import numpy as np
@@ -14,17 +14,21 @@ from Utils.loading import Loading
 
 class PSDAnalysis(Analysis):
     def __init__(self):
-        super().__init__('PSD Analysis')
-        self._info_file = None
+        super().__init__(ctes.NAME_PSD)
+        self._files = None
         self._file_name = 'analysis'
         self._number_session = 0
-        self._path_persist = './Persist/Parameters/psd_default.json'
+        self._path_persist = './Persist/Parameters/psd_default'
         self._presentation = None
         self._export_data_path = './ExportData/PSD'
+        self.data_compare = {}
+
+    def set_files(self, files: File) -> None:
+        self._files = files
 
     def _load_default_params(self, info_file) -> None:
         try:
-            with open(self._path_persist, "r") as file:
+            with open(f"{self._path_persist}-{info_file.file_name}.json", "r") as file:
                 self.default_values = json.load(file)
         except:
             self.default_values = {
@@ -37,18 +41,17 @@ class PSDAnalysis(Analysis):
                 'time2': info_file.times[len(info_file.times) - 1],
             }
 
-    def load_analysis(self, info_file: LFPFile) -> None:
-        self._load_default_params(info_file)
-        signals = (ctes.POPUP, ('Signal'), info_file.signals, self.default_values['signal'])
+    def load_analysis(self) -> None:
+        self._load_default_params(self._files.info_file)
+        signals = (ctes.POPUP, ('Signal'), self._files.info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
-        freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(info_file.frequencies), self.default_values['freq'])
-        idx1 = (ctes.POPUP, ('Time 1'), info_file.times, self.default_values['time1'])
-        idx2 = (ctes.POPUP, ('Time 2'), info_file.times, self.default_values['time2'])
+        freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self._files.info_file.frequencies), self.default_values['freq'])
+        idx1 = (ctes.POPUP, ('Time 1'), self._files.info_file.times, self.default_values['time1'])
+        idx2 = (ctes.POPUP, ('Time 2'), self._files.info_file.times, self.default_values['time2'])
 
-        self._info_file = info_file
         self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
 
     def _generate_all(self, taper1, taper2, fs, freq, time1, time2):
@@ -59,8 +62,60 @@ class PSDAnalysis(Analysis):
                 self._generate_pptx(f"{label} - Spectral Power Density (PSD)", label)
 
         if self._presentation is not None:
-            self._presentation.save(f'{self._export_data_path}/{self._info_file.file_name}.pptx')
+            self._presentation.save(f'{self._export_data_path}/{self._files.info_file.file_name}.pptx')
             self._presentation = None
+
+    def generate_all_files(self, files):
+        Loading().start(self.generate_all_files_th, (files,))
+
+
+    def generate_all_files_th(self, files):
+        for file in files:
+            current_file = self._files.get_specific_file(file)
+            if current_file.get_parameters() is not None and len(current_file.get_parameters()) > 0:
+                data = current_file.get_parameters()
+            else:
+                data = self.get_value_parameters()
+            taper1 = data['taper1']
+            taper2 = data['taper2']
+            fs = data['fs']
+            str_freq = data['freq']
+            freq = current_file.frequencies.index(str_freq) + 1
+            str_time1 = data['time1']
+            time1 = current_file.times.index(str_time1)
+            str_time2 = data['time2']
+            time2 = current_file.times.index(str_time2)
+            str_signal = data['signal']
+            signal = current_file.signals.index(str_signal)
+            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(current_file.times), current_file)
+            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            if res == 1:
+                self._save_data_temp(file)
+
+        self._generate_plot_all_files()
+
+    def _save_data_temp(self, name_file):
+        file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
+        # Open file in read mode
+        with open(file, 'r') as f:
+            # read file content
+            content = f.read()
+
+            # decdoe content ot json format
+            data = json.loads(content)
+
+        os.remove(file)
+        to_save = {
+            'f': data['f'],
+            'psd': 10 * np.log10(data['psd'])
+        }
+        self.data_compare[name_file] = to_save
+
+    def _generate_plot_all_files(self):
+        # show plot
+        self._number_session += 1
+        Plot().add_multi_line_plot(self.data_compare, 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)',f"{self._number_session} - Spectral Power Density (PSD)")
+        Loading().change_state()
 
     def generate(self) -> None:
         Loading().start(self.generate_th)
@@ -72,26 +127,29 @@ class PSDAnalysis(Analysis):
         taper2 = data['taper2']
         fs = data['fs']
         str_freq = data['freq']
-        freq = self._info_file.frequencies.index(str_freq) + 1
+        freq = self._files.info_file.frequencies.index(str_freq) + 1
         str_time1 = data['time1']
-        time1 = self._info_file.times.index(str_time1)
+        time1 = self._files.info_file.times.index(str_time1)
         str_time2 = data['time2']
-        time2 = self._info_file.times.index(str_time2)
+        time2 = self._files.info_file.times.index(str_time2)
         all_signals = data['all']
         if all_signals:
             self._generate_all(taper1, taper2, fs, freq, time1, time2)
         else:
             str_signal = data['signal']
-            signal = self._info_file.signals.index(str_signal)
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
+            signal = self._files.info_file.signals.index(str_signal)
+            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._files.info_file.times))
             res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
             if res == 1:
                 self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
         Loading().change_state()
 
-    def _get_signal_data(self, signal, freq, time1, time2, n) -> List[str]:
-        data_in_freq = self._info_file.nex.iloc[freq]
-        range1 = self._get_range(signal, time1, n)
+    def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> List[str]:
+        if file is None:
+            data_in_freq = self._files.info_file.nex.iloc[freq]
+        else:
+            data_in_freq = file.nex.iloc[freq]
+        range1 = self._get_range(signal, time1, n) - 1
         range2 = self._get_range(signal, time2, n)
         arr_signal = "["
         for index in range(range1, range2):
@@ -127,7 +185,7 @@ class PSDAnalysis(Analysis):
         self._number_session += 1
         Plot().add_line_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)', title)
 
-    def save_params(self) -> None:
+    def save_params_session(self) -> None:
         data = self.get_value_parameters()
         signal = data['signal']
         taper1 = data['taper1']
@@ -147,7 +205,10 @@ class PSDAnalysis(Analysis):
             'time2': str(time2),
         }
 
-        with open(self._path_persist, "w") as file:
+    def save_params(self) -> None:
+        self.save_params_session()
+
+        with open(f'{self._path_persist}-{self._files.info_file.file_name}.json', "w") as file:
             json.dump(self.default_values, file)
 
     def destroy(self) -> None:

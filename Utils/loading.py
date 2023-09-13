@@ -62,7 +62,7 @@ class Loading:
             cls._cap.release()
             cls._lblVideo.image = ""
             cls._cap = cv2.VideoCapture('./assets/loading.gif')
-            cls.show()
+            cls._show()
         else:
             cls._lblVideo.image = ""
             cls._cap.release()

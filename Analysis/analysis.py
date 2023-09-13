@@ -49,10 +49,6 @@ class Analysis(ABC):
         pass
 
     @abstractmethod
-    def show_params(self, master) -> None:
-        pass
-
-    @abstractmethod
     def get_value_parameters(self) -> Dict:
         pass
 

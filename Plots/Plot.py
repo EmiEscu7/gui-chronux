@@ -39,6 +39,19 @@ class Plot:
         cls._plots[tab_title] = [ax, canvas]
         cls._tabview.set(tab_title)
 
+
+    def add_multi_line_plot(cls, data, xlabel, ylabel, title_plot, title) -> None:
+        fig = Figure(figsize=(7,6), dpi=100)
+        ax = fig.add_subplot(111)
+
+        for d in data.values():
+            ax.plot(d['f'], d['psd'])
+        ax.set_title(title_plot, fontsize=16)
+        ax.set_xlabel(xlabel, fontsize=12)
+        ax.set_ylabel(ylabel, fontsize=12)
+
+        cls._add_plot_in_tab(fig, ax, title)
+
     def add_line_plot(cls, x, y, xlabel, ylabel, title_plot, title) -> None:
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)

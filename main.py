@@ -1,15 +1,14 @@
-import time
+import tkinter
 
 import customtkinter as ctk
 from typing import List, Tuple
 from Analysis.psd_analysis import PSDAnalysis
 from Analysis.spectogram_analysis import SpectogramAnalysis
 from Files.file import File
-from PIL import Image
-import constants as ctes
 from Plots.Plot import Plot
 from Utils.loading import Loading
-from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab
+from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab, frame_multi_analysis
+import constants as ctes
 
 
 class GUI:
@@ -35,23 +34,58 @@ class GUI:
 
     def callback_type_analysis(self, choice):
         if self._analysis is not None:
+            self._load_files.info_file.set_parameters(self._analysis)
             self._analysis.destroy()
         if choice == 'PSD Analysis':
             self._analysis = PSDAnalysis()
-            self._analysis.load_analysis(self._load_files.info_file)
+            self._analysis.set_files(self._load_files)
+            self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)
+            self._load_files.info_file.set_parameters(self._analysis)
         if choice == 'Spectogram Analysis':
             self._analysis = SpectogramAnalysis()
-            self._analysis.load_analysis(self._load_files.info_file)
+            self._analysis.set_files(self._load_files)
+            self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)
+            self._load_files.info_file.set_parameters(self._analysis)
+
+    def multi_analysis(self):
+
+        def callback():
+            multi_analysis_window.destroy()
+            if option.get() == ctes.CURRENT_FILE:
+                self._analysis.generate()
+            else:
+                self._analysis.generate_all_files(self._load_files.files())
+
+        multi_analysis_window = ctk.CTkToplevel()
+        multi_analysis_window.title("Select Files")
+        multi_analysis_window.geometry("500x300")
+        multi_analysis_window.wm_attributes("-topmost", True)
+        option = tkinter.IntVar(value=0)
+        frame_sf = frame_multi_analysis(multi_analysis_window, option, callback)
+        frame_sf.pack()
 
     def command_function_btn(self):
-        if self._analysis is not None: self._analysis.generate()
+        if self._analysis is not None:
+            if self._load_files.cant_files() > 1:
+                self.multi_analysis()
+            else:
+                self._analysis.generate()
 
     def show_info(self):
         if self._tabview is not None:
             data = self._load_files.info_file.show_info()
             self.add_tab(self._load_files.info_file.file_name, data)
+
+    def callback_change_tab(self):
+        if self._analysis is not None:
+            self._analysis.save_params_session()
+            self._load_files.change_current_file(self._tabview.get())
+            self._analysis.destroy()
+            self._analysis.load_analysis()
+            self._analysis.show_params(self._frame_params)
+
 
     def load_gui(self, geometry: str) -> ctk.CTk:
         ctk.set_appearance_mode("light")
@@ -59,8 +93,6 @@ class GUI:
 
         app = ctk.CTk()
         app.geometry(geometry)
-
-        # Loading(app, app.winfo_screenwidth(), app.winfo_screenheight())
 
         """
             BUTTON TO LOAD FILES
@@ -88,7 +120,7 @@ class GUI:
             INFO FILE SECTION
         """
         self._info_section = frame_info_file(app)
-        self._tabview = tabview_frame(self._info_section)
+        self._tabview = tabview_frame(self._info_section, self.callback_change_tab)
         self._info_section.pack()
         self._info_section.place(relx=0.77, rely=0.01, anchor=ctk.NW)
 
