@@ -15,6 +15,8 @@ def frame_load_files(master) -> ctk.CTkFrame:
         border_color=ctes.BORDER_COLOR,
         corner_radius=0,
     )
+    frame.pack_propagate(False)
+
     return frame
 
 
@@ -30,6 +32,7 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         scrollbar_button_color=ctes.GRAY_COLOR,
         scrollbar_button_hover_color=ctes.LIGHT_GRAY_COLOR,
     )
+    frame.pack_propagate(False)
 
     title = ctk.CTkLabel(
         master=frame,
@@ -115,6 +118,7 @@ def frame_info_file(master) -> ctk.CTkFrame:
         border_color=ctes.BORDER_COLOR,
         corner_radius=0,
     )
+    frame.pack_propagate(False)
 
     title = ctk.CTkLabel(
         master=frame,
@@ -170,6 +174,7 @@ def get_frame_tab(master, data: List[Tuple[str, any]]) -> ctk.CTkFrame:
         fg_color='transparent',
         corner_radius=0,
     )
+    frame.pack_propagate(False)
 
     for d in data:
         text = f"{d[0]}: {d[1]}"

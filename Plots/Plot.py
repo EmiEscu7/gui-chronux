@@ -160,11 +160,12 @@ class Plot:
             height=ctes.HEIGHT_FRAME_PLOT,
             fg_color='transparent',
         )
+        frame.pack_propagate(False)
 
         cls._tabview = ctk.CTkTabview(
             master=frame,
             width=ctes.WIDTH_FRAME_PLOT - 10,
-            height=ctes.HEIGHT_FRAME_PLOT - 10,
+            height=ctes.HEIGHT_FRAME_PLOT - 50,
             fg_color=ctes.BG_COLOR,
             segmented_button_selected_color=ctes.LIGHT_BLUE_DARK,
             segmented_button_selected_hover_color=ctes.BG_COLOR,
