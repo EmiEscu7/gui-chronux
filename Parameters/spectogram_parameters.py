@@ -47,7 +47,7 @@ class SpectogramParameters(Parameters):
 
     def get_data_params(self) -> Dict:
         return {
-            'signal': str(self._popups[self._signals[1]].get()),
+            'signal': str(self.popups_multiple[self._signals[1]].get()),
             'all': self.dict_checks[self._check_all_signals[1]].get(),
             'movingwin1': float(self.entries[self._movingwin1[1]].get()),
             'movingwin2': float(self.entries[self._movingwin2[1]].get()),
@@ -57,8 +57,8 @@ class SpectogramParameters(Parameters):
             'freq': float(self.popups[self._frequencies[1]].get()),
             'freq_pass1': int(self.entries[self._freq_pass1[1]].get()),
             'freq_pass2': int(self.entries[self._freq_pass2[1]].get()),
-            'time1': str(self._popups[self._time1[1]].get()),
-            'time2': str(self._popups[self._time2[1]].get()),
+            'time1': str(self.popups[self._time1[1]].get()),
+            'time2': str(self.popups[self._time2[1]].get()),
             'trialave': int(self.entries[self._trialave[1]].get()),
             'err': int(self.entries[self._err[1]].get()),
         }

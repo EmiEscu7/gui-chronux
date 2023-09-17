@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 from Analysis.analysis import Analysis
-import constants as ctes
 
 
 class InfoFile(ABC):

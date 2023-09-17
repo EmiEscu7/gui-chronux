@@ -39,13 +39,14 @@ class GUI:
             self._analysis.destroy()
         if choice == 'PSD Analysis':
             self._analysis = PSDAnalysis()
-            self._analysis.set_files(self._load_files)
+            self._analysis.files = self._load_files
             self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)
             self._load_files.info_file.set_parameters(self._analysis)
         if choice == 'Spectogram Analysis':
             self._analysis = SpectogramAnalysis()
-            self._analysis.set_files(self._load_files)
+            self._analysis.files = self._load_files
+            self._analysis.files = self._load_files
             self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)
             self._load_files.info_file.set_parameters(self._analysis)

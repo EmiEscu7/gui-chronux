@@ -15,16 +15,13 @@ from Utils.loading import Loading
 class PSDAnalysis(Analysis):
     def __init__(self):
         super().__init__(ctes.NAME_PSD)
-        self._files = None
+        self.files = None
         self._file_name = 'analysis'
         self._number_session = 0
         self._path_persist = './Persist/Parameters/psd_default'
         self._presentation = None
         self._export_data_path = './ExportData/PSD'
         self.data_compare = {}
-
-    def set_files(self, files: File) -> None:
-        self._files = files
 
     def _load_default_params(self, info_file) -> None:
         try:
@@ -42,15 +39,15 @@ class PSDAnalysis(Analysis):
             }
 
     def load_analysis(self) -> None:
-        self._load_default_params(self._files.info_file)
-        signals = (ctes.POPUP_MULTIPLE, ('Signal'), self._files.info_file.signals, self.default_values['signal'])
+        self._load_default_params(self.files.info_file)
+        signals = (ctes.POPUP_MULTIPLE, ('Signal'), self.files.info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
-        freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self._files.info_file.frequencies), self.default_values['freq'])
-        idx1 = (ctes.POPUP, ('Time 1'), self._files.info_file.times, self.default_values['time1'])
-        idx2 = (ctes.POPUP, ('Time 2'), self._files.info_file.times, self.default_values['time2'])
+        freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self.files.info_file.frequencies), self.default_values['freq'])
+        idx1 = (ctes.POPUP, ('Time 1'), self.files.info_file.times, self.default_values['time1'])
+        idx2 = (ctes.POPUP, ('Time 2'), self.files.info_file.times, self.default_values['time2'])
 
         self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
 
@@ -62,7 +59,7 @@ class PSDAnalysis(Analysis):
                 self._generate_pptx(f"{label} - Spectral Power Density (PSD)", label)
 
         if self._presentation is not None:
-            self._presentation.save(f'{self._export_data_path}/{self._files.info_file.file_name}.pptx')
+            self._presentation.save(f'{self._export_data_path}/{self.files.info_file.file_name}.pptx')
             self._presentation = None
 
     def generate_all_files(self, files):
@@ -71,7 +68,7 @@ class PSDAnalysis(Analysis):
 
     def generate_all_files_th(self, files):
         for file in files:
-            current_file = self._files.get_specific_file(file)
+            current_file = self.files.get_specific_file(file)
             if current_file.get_parameters() is not None and len(current_file.get_parameters()) > 0:
                 data = current_file.get_parameters()
             else:
@@ -127,11 +124,11 @@ class PSDAnalysis(Analysis):
         taper2 = data['taper2']
         fs = data['fs']
         str_freq = data['freq']
-        freq = self._files.info_file.frequencies.index(str_freq) + 1
+        freq = self.files.info_file.frequencies.index(str_freq) + 1
         str_time1 = data['time1']
-        time1 = self._files.info_file.times.index(str_time1)
+        time1 = self.files.info_file.times.index(str_time1)
         str_time2 = data['time2']
-        time2 = self._files.info_file.times.index(str_time2)
+        time2 = self.files.info_file.times.index(str_time2)
         all_signals = data['all']
         if all_signals:
             self._generate_all(taper1, taper2, fs, freq, time1, time2)
@@ -139,16 +136,16 @@ class PSDAnalysis(Analysis):
             str_signal = str(data['signal'])
             arr_signal = str_signal.split(",")
             if len(arr_signal) == 1:
-                signal = self._files.info_file.signals.index(arr_signal[0].strip())
-                signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._files.info_file.times))
+                signal = self.files.info_file.signals.index(arr_signal[0].strip())
+                signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
                 res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
                 if res == 1:
-                    self._generate_plot(f"{self._number_session} - Spectral Power Density (PSD)")
+                    self._generate_plot(f"{self._number_session} - {self.files.info_file.file_name} - Spectral Power Density (PSD)")
                 Loading().change_state()
             else:
                 for select_signal in arr_signal:
-                    signal = self._files.info_file.signals.index(select_signal.strip())
-                    signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._files.info_file.times))
+                    signal = self.files.info_file.signals.index(select_signal.strip())
+                    signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
                     res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
                     if res == 1:
                         self._save_data_temp(select_signal)
@@ -156,7 +153,7 @@ class PSDAnalysis(Analysis):
 
     def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> List[str]:
         if file is None:
-            data_in_freq = self._files.info_file.nex.iloc[freq]
+            data_in_freq = self.files.info_file.nex.iloc[freq]
         else:
             data_in_freq = file.nex.iloc[freq]
         range1 = self._get_range(signal, time1, n) - 1
@@ -172,8 +169,9 @@ class PSDAnalysis(Analysis):
 
     def psd_analysis(self, signal, taper1, taper2, fs) -> float:
         # Execute MATLAB in CMD and capture output
-        function = f"PSDAnalysis2({signal}, {taper1}, {taper2}, {fs}, '{ctes.FOLDER_RES + 'PSD/'}', '{self._file_name}')"
-        return self.analysis(function)
+        # function = f"PSDAnalysis2({signal}, "
+        params = f"{taper1}, {taper2}, {fs}, '{ctes.FOLDER_RES + 'PSD/'}', '{self._file_name}'"
+        return self.analysis('PSDAnalysis2', signal, params)
 
     def _generate_plot(self, title) -> None:
         file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
@@ -218,7 +216,7 @@ class PSDAnalysis(Analysis):
     def save_params(self) -> None:
         self.save_params_session()
 
-        with open(f'{self._path_persist}-{self._files.info_file.file_name}.json', "w") as file:
+        with open(f'{self._path_persist}-{self.files.info_file.file_name}.json', "w") as file:
             json.dump(self.default_values, file)
 
     def destroy(self) -> None:

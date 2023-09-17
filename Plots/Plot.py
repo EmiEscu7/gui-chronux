@@ -6,7 +6,7 @@ import customtkinter as ctk
 import tkinter as tk
 import numpy as np
 from PIL import Image
-
+from Utils.loading import Loading
 
 class Plot:
     _instance = None
@@ -22,8 +22,34 @@ class Plot:
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
 
-        pcm = ax.pcolormesh(t, f, np.transpose(s))
-        plt.colorbar(pcm, ax=ax, label='dB')
+        try:
+            f_max = max(f)
+            f_min = min(f)
+        except:
+            f_max = f + 100
+            f_min = f
+
+        try:
+            t_max = max(t)
+            t_min = min(t)
+        except:
+            t_max = t + 100
+            t_min = t
+
+        # Define the number of time and frequency bins based on the shape of S
+        try:
+            num_time_bins = len(t)
+        except:
+            num_time_bins = 1
+
+        try:
+            num_freq_bins = len(f)
+        except:
+            num_freq_bins = 1
+
+        pcm = ax.imshow(np.transpose(s), aspect='auto', origin='lower', cmap='viridis',
+                        extent=[t_min, t_max, f_min, f_max])
+        plt.colorbar(pcm, ax=ax, label='Power Spectral Density (dB)')
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
         ax.set_title(title_plot, fontsize=16)
@@ -82,6 +108,50 @@ class Plot:
 
         plt.savefig(path)
         plt.clf()
+
+    def add_multi_color_plot(cls, data, xlabel, ylabel, title_plot, title) -> None:
+        for k, d in data.items():
+            fig = Figure(figsize=(7, 6), dpi=100)
+            ax = fig.add_subplot(111)
+            t = d['t']
+            f = d['f']
+
+            try:
+                f_max = max(f)
+                f_min = min(f)
+            except:
+                f_max = f+100
+                f_min = f
+
+            try:
+                t_max = max(t)
+                t_min = min(t)
+            except:
+                t_max = t
+                t_min = t
+
+            # Define the number of time and frequency bins based on the shape of S
+            try:
+                num_time_bins = len(t)
+            except:
+                num_time_bins = 1
+
+            try:
+                num_freq_bins = len(f)
+            except:
+                num_freq_bins = 1
+
+            # Reshape S into a 2D array
+            s = d['S'].reshape(num_freq_bins, num_time_bins)
+
+            pcm = ax.imshow(np.transpose(s), aspect='auto', origin='lower', cmap='viridis',
+                    extent=[t_min, t_max, f_min, f_max])
+            plt.colorbar(pcm, ax=ax, label='Power Spectral Density (dB)')
+            ax.set_title(title_plot, fontsize=16)
+            ax.set_xlabel(xlabel, fontsize=12)
+            ax.set_ylabel(ylabel, fontsize=12)
+
+            cls._add_plot_in_tab(fig, ax, f"{title}-{k}")
 
     def get_frame(cls, master) -> ctk.CTkFrame:
         frame = ctk.CTkFrame(
