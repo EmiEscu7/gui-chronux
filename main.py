@@ -88,6 +88,9 @@ class GUI:
             self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)
 
+    def callback_delete_tab(self, tab_name, new_tab):
+        if self._load_files is not None:
+            self._load_files.delete_file(tab_name, new_tab)
 
     def load_gui(self, geometry: str) -> ctk.CTk:
         ctk.set_appearance_mode("light")
@@ -122,7 +125,7 @@ class GUI:
             INFO FILE SECTION
         """
         self._info_section = frame_info_file(app)
-        self._tabview = tabview_frame(self._info_section, self.callback_change_tab)
+        self._tabview = tabview_frame(self._info_section, self.callback_change_tab, self.callback_delete_tab)
         self._info_section.pack()
         self._info_section.place(relx=0.77, rely=0.01, anchor=ctk.NW)
 

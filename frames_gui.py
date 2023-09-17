@@ -133,9 +133,7 @@ def frame_info_file(master) -> ctk.CTkFrame:
 
     return frame
 
-
-
-def tabview_frame(master, callback_change_tab) -> ctk.CTkTabview:
+def tabview_frame(master, callback_change_tab, callback_delete_tab) -> ctk.CTkTabview:
     tabview = ctk.CTkTabview(
         master=master,
         width=ctes.WIDTH_RIGHT_SIDE - 10,
@@ -149,6 +147,30 @@ def tabview_frame(master, callback_change_tab) -> ctk.CTkTabview:
         corner_radius=0,
         command=callback_change_tab,
     )
+
+    def close_tab():
+        tab_name = tabview.get() if tabview.get().strip() != '' else None
+        if tab_name is not None:
+            tabview.delete(tab_name)
+            new_tab = tabview.get() if tabview.get().strip() != '' else None
+            callback_delete_tab(tab_name, new_tab)
+
+    btn_close = ctk.CTkButton(
+        master=tabview,
+        text='X',
+        command=close_tab,
+        width=20,
+        height=ctes.INPUT_HEIGHT,
+        anchor=ctk.N,
+        fg_color='transparent',
+        hover_color=ctes.WITHE,
+        corner_radius=1000,
+        border_width=0,
+        text_color=ctes.BLACK,
+        font=(ctes.FAMILY_FONT, ctes.SUBTITLE_SIZE),
+    )
+    btn_close.grid(row=0, column=1)
+
     tabview.pack(padx=5, pady=5)
 
     return tabview

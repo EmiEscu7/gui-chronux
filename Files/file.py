@@ -117,6 +117,16 @@ class File:
     def change_current_file(self, name):
         self._info_file = self._all_files[name]
 
+    def delete_file(self, name, new_file):
+        if self._info_file.file_name == name:
+            if new_file is None:
+                self._info_file = None
+            else:
+                self._info_file = self._all_files[new_file]
+
+        if name in self._all_files.keys():
+            del self._all_files[name]
+
     def get_specific_file(self, name) -> InfoFile:
         return self._all_files[name]
 
