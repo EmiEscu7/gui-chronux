@@ -8,6 +8,7 @@ from Parameters.Inputs.textbox_input import TextboxInput
 from Parameters.Inputs.entry_input import EntryInput
 from Parameters.Inputs.popup_input import PopupInput
 from Parameters.Inputs.popup_multiple_input import PopupMultipleInput
+from Parameters.Inputs.entry_range_input import EntryRangeInput
 import constants as ctes
 import tkinter as tk
 
@@ -20,6 +21,7 @@ class Parameters(ABC):
         self._popups = {}
         self._dict_checks = {}
         self._popups_multiple = {}
+        self._entry_range = {}
 
     @property
     def dict_checks(self):
@@ -40,6 +42,10 @@ class Parameters(ABC):
     @property
     def entries(self):
         return self._entries
+
+    @property
+    def entry_range(self):
+        return self._entry_range
 
     def load_params(self, master, attrbs) -> List[Union[CTkCheckBox, CTkComboBox, CTkRadioButton, CTkTextbox, CTkEntry]]:
         params = []
@@ -172,6 +178,23 @@ class Parameters(ABC):
                 self._popups_multiple[atr[1]].set(atr[3])
                 popup_m_input = popup_m.get_item()
                 params.append(popup_m_input)
+            elif input_type == ctes.ENTRY_RANGE:
+                self._entry_range[atr[1]] = (tk.StringVar(value=atr[3]), tk.StringVar(value=atr[4]))
+                entry_range = EntryRangeInput(
+                    master=master,
+                    width=ctes.INPUT_WIDTH,
+                    height=ctes.INPUT_HEIGHT,
+                    corner_radius=0,
+                    text_color=ctes.BLACK,
+                    font=(ctes.FAMILY_FONT, ctes.TEXT_SIZE),
+                    fg_color=ctes.LIGHT_BLUE_DARK,
+                    placeholder_text=atr[1],
+                    textvariable=self._entry_range[atr[1]],
+                )
+                self._entry_range[atr[1]][0].set(atr[3])
+                self._entry_range[atr[1]][1].set(atr[4])
+                entry_range_input = entry_range.get_item()
+                params.append(entry_range_input)
 
         return params
 

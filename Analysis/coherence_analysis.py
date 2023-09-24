@@ -136,7 +136,7 @@ class CoherenceAnalysis(Analysis):
         fpass = f'[{freq_pass1} {freq_pass2}]'
         errs = f'[{err} {err+1}]'
         params = f"{tapers}, {fs}, {fpass}, {errs}, {trialave}, '{ctes.FOLDER_RES + 'Coherence/'}', '{self._file_name}'"
-        return self.analysis('Coherency', signal1, signal2, params)
+        return self.manalysis('Coherency', signal1, signal2, params)
 
     def _save_data_temp(self, name_file):
         file = f"{ctes.FOLDER_RES}Coherence/{self._file_name}.json"

@@ -42,14 +42,15 @@ class PSDAnalysis(Analysis):
         self._load_default_params(self.files.info_file)
         signals = (ctes.POPUP_MULTIPLE, ('Signal'), self.files.info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
-        taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
-        taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
+        # taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
+        # taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
+        tapers = (ctes.ENTRY_RANGE, 'Tapers', '', self.default_values['taper1'], self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
         freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self.files.info_file.frequencies), self.default_values['freq'])
         idx1 = (ctes.POPUP, ('Time 1'), self.files.info_file.times, self.default_values['time1'])
         idx2 = (ctes.POPUP, ('Time 2'), self.files.info_file.times, self.default_values['time2'])
 
-        self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
+        self.parameters = PSDParameters(signals, check_all_signals, tapers, fs, freqs, idx1, idx2)
 
     def _generate_all(self, taper1, taper2, fs, freq, time1, time2):
         for signal, label in enumerate(self.files.info_file.signals):
@@ -174,7 +175,7 @@ class PSDAnalysis(Analysis):
         # Execute MATLAB in CMD and capture output
         # function = f"PSDAnalysis2({signal}, "
         params = f"{taper1}, {taper2}, {fs}, '{ctes.FOLDER_RES + 'PSD/'}', '{self._file_name}'"
-        return self.analysis('PSDAnalysis2', signal, params)
+        return self.analysis('PSDAnalysis2', signal=signal, params=params)
 
     def _generate_plot(self, title) -> None:
         file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
