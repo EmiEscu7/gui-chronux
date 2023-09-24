@@ -52,8 +52,8 @@ class PSDAnalysis(Analysis):
         self.parameters = PSDParameters(signals, check_all_signals, taper1, taper2, fs, freqs, idx1, idx2)
 
     def _generate_all(self, taper1, taper2, fs, freq, time1, time2):
-        for signal, label in enumerate(self._info_file.signals):
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self._info_file.times))
+        for signal, label in enumerate(self.files.info_file.signals):
+            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
             res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
             if res == 1:
                 self._generate_pptx(f"{label} - Spectral Power Density (PSD)", label)
@@ -61,6 +61,8 @@ class PSDAnalysis(Analysis):
         if self._presentation is not None:
             self._presentation.save(f'{self._export_data_path}/{self.files.info_file.file_name}.pptx')
             self._presentation = None
+        Loading().change_state()
+
 
     def generate_all_files(self, files):
         Loading().start(self.generate_all_files_th, (files,))
@@ -112,6 +114,7 @@ class PSDAnalysis(Analysis):
         # show plot
         self._number_session += 1
         Plot().add_multi_line_plot(self.data_compare, 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)',f"{self._number_session} - Spectral Power Density (PSD)")
+        self.data_compare = {}
         Loading().change_state()
 
     def generate(self) -> None:

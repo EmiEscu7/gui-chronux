@@ -4,12 +4,12 @@ import customtkinter as ctk
 from typing import List, Tuple
 from Analysis.psd_analysis import PSDAnalysis
 from Analysis.spectogram_analysis import SpectogramAnalysis
+from Analysis.coherence_analysis import CoherenceAnalysis
 from Files.file import File
 from Plots.Plot import Plot
 from Utils.loading import Loading
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab, frame_multi_analysis
 import constants as ctes
-from Utils.popup_searcher_multiple import PopupSearcherMultiple
 
 
 class GUI:
@@ -39,13 +39,12 @@ class GUI:
             self._analysis.destroy()
         if choice == 'PSD Analysis':
             self._analysis = PSDAnalysis()
-            self._analysis.files = self._load_files
-            self._analysis.load_analysis()
-            self._analysis.show_params(self._frame_params)
-            self._load_files.info_file.set_parameters(self._analysis)
-        if choice == 'Spectogram Analysis':
+        elif choice == 'Spectogram Analysis':
             self._analysis = SpectogramAnalysis()
-            self._analysis.files = self._load_files
+        elif choice == 'Coherence Analysis':
+            self._analysis = CoherenceAnalysis()
+
+        if self._analysis is not None:
             self._analysis.files = self._load_files
             self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)

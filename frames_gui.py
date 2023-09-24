@@ -32,7 +32,6 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         scrollbar_button_color=ctes.GRAY_COLOR,
         scrollbar_button_hover_color=ctes.LIGHT_GRAY_COLOR,
     )
-    frame.pack_propagate(False)
 
     title = ctk.CTkLabel(
         master=frame,

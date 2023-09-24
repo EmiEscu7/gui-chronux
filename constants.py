@@ -14,7 +14,7 @@ BG_HEADER_COLOR = '#A6DDF5'
 # FONTS
 FAMILY_FONT = 'roboto'
 
-TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis']
+TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis', 'Coherence Analysis']
 
 # SIZES
 WIDTH_LEFT_SIDE = 300

@@ -99,8 +99,30 @@ class Analysis(ABC):
         with open(file, 'w') as f:
             f.write(json.dumps({'signal': signal}))
 
+    def _save_signal(self, signal1, signal2):
+        file = f"{ctes.FOLDER_RES}Signal/signal.json"
+        with open(file, 'w') as f:
+            f.write(json.dumps({'data1': signal1, 'data2': signal2}))
+
     def analysis(self, funtion, signal, params) -> float:
         self._save_signal(signal)
+        process = subprocess.Popen(['matlab', '-batch', f"disp({funtion}({params}))"], stdout=subprocess.PIPE)
+
+        output = process.communicate()[0]
+        decode = output.decode()
+        if "ERROR" in decode:
+            print(decode)
+            return 0.0
+        try:
+            result = float(decode.strip())
+            return result
+        except:
+            print(decode.strip())
+            Loading().change_state()
+            return 0
+
+    def analysis(self, funtion, signal1, signal2, params) -> float:
+        self._save_signal(signal1, signal2)
         process = subprocess.Popen(['matlab', '-batch', f"disp({funtion}({params}))"], stdout=subprocess.PIPE)
 
         output = process.communicate()[0]

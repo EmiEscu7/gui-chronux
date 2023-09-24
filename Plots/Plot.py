@@ -33,7 +33,7 @@ class Plot:
             t_max = max(t)
             t_min = min(t)
         except:
-            t_max = t + 100
+            t_max = int(t) + 100
             t_min = t
 
         # Define the number of time and frequency bins based on the shape of S
@@ -46,6 +46,9 @@ class Plot:
             num_freq_bins = len(f)
         except:
             num_freq_bins = 1
+
+        # Reshape S into a 2D array
+        s = s.reshape(num_freq_bins, num_time_bins)
 
         pcm = ax.imshow(np.transpose(s), aspect='auto', origin='lower', cmap='viridis',
                         extent=[t_min, t_max, f_min, f_max])
@@ -109,6 +112,17 @@ class Plot:
         plt.savefig(path)
         plt.clf()
 
+    def add_coherence_plot(cls,c, phi, s12, s1, s2, f, confC, phistd, xlabel, ylabel, title_plot, title):
+        fig = Figure(figsize=(7, 6), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.plot(f, c, label="Coherence", linewidth=2)
+        ax.plot(f, phi, label="Phase", linewidth=1, linestyle="--")
+        ax.set_xlabel(xlabel, fontsize=12)
+        ax.set_ylabel(ylabel, fontsize=12)
+        ax.set_title(title_plot, fontsize=16)
+        ax.legend()
+        cls._add_plot_in_tab(fig, ax, title)
+
     def add_multi_color_plot(cls, data, xlabel, ylabel, title_plot, title) -> None:
         for k, d in data.items():
             fig = Figure(figsize=(7, 6), dpi=100)
@@ -157,7 +171,7 @@ class Plot:
         frame = ctk.CTkFrame(
             master=master,
             width=ctes.WIDTH_FRAME_PLOT,
-            height=ctes.HEIGHT_FRAME_PLOT,
+            height=ctes.HEIGHT_FRAME_PLOT + 50,
             fg_color='transparent',
         )
         frame.pack_propagate(False)
@@ -307,7 +321,7 @@ class Plot:
             command=cls.move_down
         )
 
-        zoom_in_button.pack(side=tk.LEFT)
+        zoom_in_button.pack(side=tk.LEFT, pady=0.1)
         zoom_out_button.pack(side=tk.LEFT)
         move_left_button.pack(side=tk.LEFT)
         move_right_button.pack(side=tk.LEFT)

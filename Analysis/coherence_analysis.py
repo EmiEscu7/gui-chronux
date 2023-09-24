@@ -1,25 +1,23 @@
-from Analysis.analysis import Analysis
-from Parameters.spectogram_parameters import SpectogramParameters
-from Files.file import File
-from typing import List
-import constants as ctes
+import os
 import json
 import numpy as np
-import os
+from Analysis.analysis import Analysis
+from Parameters.coherence_parameters import CoherenceParameters
 from Plots.Plot import Plot
+from Utils.loading import Loading
 from pptx import Presentation
 from pptx.util import Inches
-from Utils.loading import Loading
+import constants as ctes
 
-class SpectogramAnalysis(Analysis):
+class CoherenceAnalysis(Analysis):
 
     def __init__(self):
-        super().__init__(ctes.NAME_SPECTOGRAM)
+        super().__init__('Coherence Analysis')
         self._file_name = 'analysis'
         self._number_session = 0
-        self._path_persist = './Persist/Parameters/spectogram_default'
+        self._path_persist = './Persist/Parameters/coherence_default'
         self._presentation = None
-        self._export_data_path = './ExportData/Spectogram'
+        self._export_data_path = './ExportData/Coherence'
         self.data_compare = {}
 
     def _load_default_params(self, info_file) -> None:
@@ -29,11 +27,9 @@ class SpectogramAnalysis(Analysis):
         except:
             self.default_values = {
                 'signal': info_file.signals[0],
-                'movingwin1': '0.05',
-                'movingwin2': '0.5',
-                'taper1': '5',
+                'taper1': '3',
                 'taper2': '9',
-                'sample_freq': '200',
+                'sample_freq': '100',
                 'freq': str(info_file.frequencies[0]),
                 'freq_pass1': '0',
                 'freq_pass2': '0',
@@ -47,26 +43,62 @@ class SpectogramAnalysis(Analysis):
         self._load_default_params(self.files.info_file)
         signals = (ctes.POPUP_MULTIPLE, ('Signal'), self.files.info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
-        movingwin1 = (ctes.ENTRY, 'Moving Window 1', '', self.default_values['movingwin1'])
-        movingwin2 = (ctes.ENTRY, 'Moving Window 2', '', self.default_values['movingwin2'])
         taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
         taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
         freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self.files.info_file.frequencies), self.default_values['freq'])
         freq_pass1 = (ctes.ENTRY, 'Frequency band 1', '', self.default_values['freq_pass1'])
-        freq_pass2 =(ctes.ENTRY, 'Frequency band 2', '', self.default_values['freq_pass2'])
+        freq_pass2 = (ctes.ENTRY, 'Frequency band 2', '', self.default_values['freq_pass2'])
         time1 = (ctes.POPUP, ('Time 1'), self.files.info_file.times, self.default_values['time1'])
         time2 = (ctes.POPUP, ('Time 2'), self.files.info_file.times, self.default_values['time2'])
         trialave = (ctes.ENTRY, 'Trialave', '', self.default_values['trialave'])
         err = (ctes.ENTRY, 'Error', '', self.default_values['err'])
 
-        self.parameters = SpectogramParameters(signals, check_all_signals, movingwin1, movingwin2, taper1, taper2, fs, freqs, freq_pass1, freq_pass2, time1, time2, trialave, err)
+        self.parameters = CoherenceParameters(signals, check_all_signals, taper1, taper2, fs, freqs, freq_pass1, freq_pass2, time1, time2, trialave, err)
 
+    def generate(self) -> None:
+        Loading().start(self.generate_th)
 
-    def _generate_all(self, mw1, mw2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
+    def generate_th(self):
+        data = self.get_value_parameters()
+        taper1 = data['taper1']
+        taper2 = data['taper2']
+        fs = data['fs']
+        str_freq = data['freq']
+        freq = self.files.info_file.frequencies.index(str_freq) + 1
+        freq_pass1 = data['freq_pass1']
+        freq_pass2 = data['freq_pass2']
+        str_time1 = data['time1']
+        time1 = self.files.info_file.times.index(str_time1)
+        str_time2 = data['time2']
+        time2 = self.files.info_file.times.index(str_time2)
+        trialave = data['trialave']
+        err = data['err']
+        all_signals = data['all']
+        if all_signals:
+            self._generate_all(taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2,trialave, err)
+        else:
+            str_signal = str(data['signal'])
+            arr_signal = str_signal.split(",")
+            if len(arr_signal) != 2:
+                # TODO generar error, tiene que haber siempre 2 seniales
+                Loading().change_state()
+                pass
+            else:
+                signal = self.files.info_file.signals.index(arr_signal[0].strip())
+                signal1 = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
+                signal = self.files.info_file.signals.index(arr_signal[1].strip())
+                signal2 = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
+                res = self.coherence_analysis(signal1, signal2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
+                if res == 1:
+                    self._generate_plot(f"{self._number_session} - {self.files.info_file.file_name} - Coherence")
+
+        Loading().change_state()
+
+    def _generate_all(self, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
         for signal, label in enumerate(self.files.info_file.signals):
             signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-            res = self.spectogram_analysis(signal_matrix, mw1, mw2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
+            res = self.coherence_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self._generate_pptx(f"{label} - Spectogram Plot", label)
 
@@ -75,42 +107,39 @@ class SpectogramAnalysis(Analysis):
                 self._presentation = None
         Loading().change_state()
 
-    def generate_all_files(self, files):
-        Loading().start(self.generate_all_files_th, (files,))
 
-    def generate_all_files_th(self, files):
-        for file in files:
-            current_file = self.files.get_specific_file(file)
-            if current_file.get_parameters() is not None and len(current_file.get_parameters()) > 0:
-                data = current_file.get_parameters()
-            else:
-                data = self.get_value_parameters()
-            movingwin1 = data['movingwin1']
-            movingwin2 = data['movingwin2']
-            taper1 = data['taper1']
-            taper2 = data['taper2']
-            fs = data['fs']
-            str_freq = data['freq']
-            freq = self.files.info_file.frequencies.index(str_freq) + 1
-            freq_pass1 = data['freq_pass1']
-            freq_pass2 = data['freq_pass2']
-            str_time1 = data['time1']
-            time1 = self.files.info_file.times.index(str_time1)
-            str_time2 = data['time2']
-            time2 = self.files.info_file.times.index(str_time2)
-            trialave = data['trialave']
-            err = data['err']
-            str_signal = data['signal']
-            signal = self.files.info_file.signals.index(str_signal)
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-            res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
-            if res == 1:
-                self._save_data_temp(file)
+    def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> str:
+        if file is None:
+            data_in_freq = self.files.info_file.nex
+        else:
+            data_in_freq = file.nex
+        range1 = self._get_range(signal, time1, n) - 1
+        range2 = self._get_range(signal, time2, n)
+        columns = data_in_freq.iloc[range1:range2]
+        if freq is None:
+            data = columns.iloc[:]
+        else:
+            data = columns.iloc[:freq]
+        matlab_string = "["
+        for r, fila in data.iterrows():
+            matlab_string += " ".join(map(str, fila)) + "; "
+        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
+        matlab_string += "]"
+        return matlab_string
 
-        self._generate_plot_all_files(current_file.info_file.file_name)
+    def _get_range(self, i, car, n) -> int:
+        return (2 + n * i) + car
+
+    def coherence_analysis(self, signal1, signal2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err):
+        # Execute MATLAB in CMD and capture output
+        tapers = f'[{taper1} {taper2}]'
+        fpass = f'[{freq_pass1} {freq_pass2}]'
+        errs = f'[{err} {err+1}]'
+        params = f"{tapers}, {fs}, {fpass}, {errs}, {trialave}, '{ctes.FOLDER_RES + 'Coherence/'}', '{self._file_name}'"
+        return self.analysis('Coherency', signal1, signal2, params)
 
     def _save_data_temp(self, name_file):
-        file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
+        file = f"{ctes.FOLDER_RES}Coherence/{self._file_name}.json"
         # Open file in read mode
         with open(file, 'r') as f:
             # read file content
@@ -133,84 +162,8 @@ class SpectogramAnalysis(Analysis):
         self.data_compare = {}
         Loading().change_state()
 
-    def generate(self) -> None:
-        Loading().start(self.generate_th)
-
-    def generate_th(self):
-        data = self.get_value_parameters()
-        movingwin1 = data['movingwin1']
-        movingwin2 = data['movingwin2']
-        taper1 = data['taper1']
-        taper2 = data['taper2']
-        fs = data['fs']
-        str_freq = data['freq']
-        freq = self.files.info_file.frequencies.index(str_freq) + 1
-        freq_pass1 = data['freq_pass1']
-        freq_pass2 = data['freq_pass2']
-        str_time1 = data['time1']
-        time1 = self.files.info_file.times.index(str_time1)
-        str_time2 = data['time2']
-        time2 = self.files.info_file.times.index(str_time2)
-        trialave = data['trialave']
-        err = data['err']
-        all_signals = data['all']
-        if all_signals:
-            self._generate_all(movingwin1, movingwin2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2,trialave, err)
-        else:
-            str_signal = str(data['signal'])
-            arr_signal = str_signal.split(",")
-            if len(arr_signal) == 1:
-                signal = self.files.info_file.signals.index(str_signal)
-                signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-                res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1,freq_pass2, trialave, err)
-                if res == 1:
-                    self._generate_plot(f"{self._number_session} - Spectogram Plot")
-                Loading().change_state()
-            else:
-                for select_signal in arr_signal:
-                    signal = self.files.info_file.signals.index(select_signal.strip())
-                    signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-                    res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
-                    if res == 1:
-                        self._save_data_temp(select_signal)
-                self._generate_plot_all_files(self.files.info_file.file_name)
-
-
-
-    def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> str:
-        if file is None:
-            data_in_freq = self.files.info_file.nex
-        else:
-            data_in_freq = file.nex
-        range1 = self._get_range(signal, time1, n) - 1
-        range2 = self._get_range(signal, time2, n)
-        columns = data_in_freq.iloc[range1:range2]
-        if freq is None:
-            data = columns.iloc[:]
-        else:
-            data = columns.iloc[:freq]
-        matlab_string = "["
-        for r, fila in data.iterrows():
-            matlab_string += " ".join(map(str, fila)) + "; "
-        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
-        matlab_string += "]"
-        return matlab_string
-
-
-    def _get_range(self, i, car, n) -> int:
-        return (2 + n * i) + car
-
-    def spectogram_analysis(self, signal, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err):
-        # Execute MATLAB in CMD and capture output
-        movingwin = f'[{movingwin1} {movingwin2}]'
-        tapers = f'[{taper1} {taper2}]'
-        fpass = f'[{freq_pass1} {freq_pass2}]'
-        params = f"{movingwin}, {tapers}, {fpass}, {fs}, {err}, {trialave}, '{ctes.FOLDER_RES + 'Spectogram/'}', '{self._file_name}'"
-        # function = f"SpectogramAnalysis({signal}, {movingwin}, {tapers}, {fpass}, {fs}, {err}, {trialave}, '{ctes.FOLDER_RES + 'Spectogram/'}', '{self._file_name}')"
-        return self.analysis('SpectogramAnalysis', signal, params)
-
     def _generate_plot(self, title):
-        file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
+        file = f"{ctes.FOLDER_RES}Coherence/{self._file_name}.json"
         # Open file in read mode
         with open(file, 'r') as f:
             # read file content
@@ -222,19 +175,15 @@ class SpectogramAnalysis(Analysis):
         os.remove(file)
 
         # get data
-        s = data['S']
-        t = data['t']
-        f = data['f']
+        c, phi, s12, s1, s2, f, confC, phistd, cerr = data.values()
 
         # show plot
         self._number_session += 1
-        Plot().add_color_plot(t, f, 10 * np.log10(s), 'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', title)
+        Plot().add_coherence_plot(c, phi, s12, s1, s2, f, confC, phistd, 'Frequency (Hz)', 'Coherence', 'Coherence Plot', title)
 
     def save_params_session(self) -> None:
         data = self.get_value_parameters()
         signal = data['signal']
-        movingwin1 = data['movingwin1']
-        movingwin2 = data['movingwin2']
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
@@ -248,8 +197,6 @@ class SpectogramAnalysis(Analysis):
 
         self.default_values = {
             'signal': signal,
-            'movingwin1': str(movingwin1),
-            'movingwin2': str(movingwin2),
             'taper1': str(taper1),
             'taper2': str(taper2),
             'sample_freq': str(fs),
@@ -272,6 +219,39 @@ class SpectogramAnalysis(Analysis):
         self.parameters.destroy()
         for box in self.boxes:
             box.destroy()
+
+    def generate_all_files(self, files):
+        Loading().start(self.generate_all_files_th, (files,))
+
+    def generate_all_files_th(self, files):
+        for file in files:
+            current_file = self.files.get_specific_file(file)
+            if current_file.get_parameters() is not None and len(current_file.get_parameters()) > 0:
+                data = current_file.get_parameters()
+            else:
+                data = self.get_value_parameters()
+            taper1 = data['taper1']
+            taper2 = data['taper2']
+            fs = data['fs']
+            str_freq = data['freq']
+            freq = self.files.info_file.frequencies.index(str_freq) + 1
+            freq_pass1 = data['freq_pass1']
+            freq_pass2 = data['freq_pass2']
+            str_time1 = data['time1']
+            time1 = self.files.info_file.times.index(str_time1)
+            str_time2 = data['time2']
+            time2 = self.files.info_file.times.index(str_time2)
+            trialave = data['trialave']
+            err = data['err']
+            str_signal = data['signal']
+            signal = self.files.info_file.signals.index(str_signal)
+            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
+            res = self.coherence_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
+            if res == 1:
+                self._save_data_temp(file)
+
+        self._generate_plot_all_files('All Files')
+
 
     def _generate_pptx(self, title, label):
         if self._presentation is None:
