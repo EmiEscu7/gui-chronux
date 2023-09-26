@@ -15,6 +15,7 @@ BG_HEADER_COLOR = '#A6DDF5'
 FAMILY_FONT = 'roboto'
 
 TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis', 'Coherence Analysis']
+TYPE_FILES = ['Spike - Matlab', 'LFP - Matlab', 'Spike - CSV', 'LFP - CSV']
 
 # SIZES
 WIDTH_LEFT_SIDE = 300

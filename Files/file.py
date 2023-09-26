@@ -6,12 +6,13 @@ from InfoFiles.lfp_file import LFPFile
 from PIL import Image
 from Utils.loading import Loading
 from InfoFiles.info_file import InfoFile
+from Utils.alert import Alert
+from Files.convert_matlab import ConvertMatlab
 
 class File:
     def __init__(self, fn_show):
-        self.INIT_OPTION_RB_TYPE_FILE = tk.IntVar(value=ctes.LFP_INT)
+        self._type_file = tk.StringVar(value=ctes.TYPE_FILES[0])
         self._path = None
-        self._type_file = self.INIT_OPTION_RB_TYPE_FILE.get()
         self._info_file = None
         self._all_files = {}
         self._type_file_window = None
@@ -19,8 +20,6 @@ class File:
 
 
     def select_format_file(self, master: ctk.CTkToplevel) -> ctk.CTkFrame:
-        def radiobutton_event():
-            self._type_file = option.get()
 
         frame = ctk.CTkFrame(
             master=master,
@@ -41,31 +40,21 @@ class File:
         label.cget("font").configure(size=ctes.SUBTITLE_SIZE)
         label.pack(padx=20, pady=5)
 
-        option = self.INIT_OPTION_RB_TYPE_FILE
-
-        lfp_option = ctk.CTkRadioButton(
-            master=frame,
-            radiobutton_width=ctes.RB_WIDTH,
-            radiobutton_height=ctes.RB_HEIGHT,
+        combo = ctk.CTkComboBox(
+            master=master,
+            values=ctes.TYPE_FILES,
+            # command=change_callback,
+            # variable=var_type_analysis,
+            width=700,
+            height=40,
+            corner_radius=0,
+            button_color=ctes.GRAY_COLOR,
+            dropdown_hover_color=ctes.PINK_GRAY_COLOR,
             text_color=ctes.BLACK,
-            text=ctes.LFP,
-            variable=option,
-            value=ctes.LFP_INT,
-            command=radiobutton_event,
+            dropdown_text_color=ctes.GRAY_COLOR,
+            variable=self._type_file
         )
-        lfp_option.pack(padx=1, pady=5)
-
-        spike_option = ctk.CTkRadioButton(
-            master=frame,
-            radiobutton_width=ctes.RB_WIDTH,
-            radiobutton_height=ctes.RB_HEIGHT,
-            text_color=ctes.BLACK,
-            text=ctes.SPIKE,
-            variable=option,
-            value=ctes.SPIKE_INT,
-            command=radiobutton_event,
-        )
-        spike_option.pack(padx=1, pady=5)
+        combo.pack(padx=20, pady=5)
 
         select_btn = ctk.CTkButton(
             master=frame,
@@ -93,6 +82,9 @@ class File:
         frame_sf.pack()
 
     def select_file(self) -> None:
+        if self._type_file.get() == ctes.TYPE_FILES[0] or self._type_file.get() == ctes.TYPE_FILES[2]:
+            Alert("Functionality not implemented", "This functionality is currently under development").show()
+            return
         self._info_file = None
         if self._type_file_window is not None: self._type_file_window.destroy()
         self._path = askopenfilename()
@@ -103,15 +95,20 @@ class File:
         return self._info_file
 
     def last_step(self):
-        if self._path is not None and self._path != '':
-            if self._type_file == ctes.LFP_INT:
+        if self._type_file.get() == ctes.TYPE_FILES[1]:
+            if self._path is not None and self._path != '':
                 self._info_file = LFPFile(self._path)
-            elif self._type_file == ctes.SPIKE_INT:
-                pass
-        if self._info_file is not None:
-            self._info_file.extract_info()
-            self._all_files[self._info_file.file_name] = self._info_file
-        self._fn_show()
+            if self._info_file is not None:
+                self._info_file.extract_info()
+                self._all_files[self._info_file.file_name] = self._info_file
+            self._fn_show()
+        elif self._type_file.get() == ctes.TYPE_FILES[3]:
+            if self._path is not None and self._path != '':
+                arr_path = self._path.split('/')
+                name = arr_path[len(arr_path)-1].split(".")[0]
+                ConvertMatlab().csv_to_matlab(self._path, name)
+        else:
+            pass
         Loading().change_state()
 
     def change_current_file(self, name):
