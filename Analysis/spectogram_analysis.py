@@ -188,7 +188,7 @@ class SpectogramAnalysis(Analysis):
         range1 = self._get_range(signal, time1, n) - 1
         range2 = self._get_range(signal, time2, n)
         columns = data_in_freq.iloc[range1:range2]
-        if freq is None:
+        if freq == ctes.ALL:
             data = columns.iloc[:]
         else:
             data = columns.iloc[:freq]

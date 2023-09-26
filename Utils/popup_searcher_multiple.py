@@ -5,7 +5,9 @@ import constants as ctes
 class PopupSearcherMultiple:
 
     def __init__(self, datos, callback):
+        self._datos = []
         self._datos = datos
+        self._datos.append(ctes.ALL)
         self._variable = None
         self._table = None
         self._elementos = {}

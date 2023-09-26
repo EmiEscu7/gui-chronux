@@ -33,13 +33,25 @@ class PSDParameters(Parameters):
         return super().load_params(master, atribs)
 
     def get_data_params(self) -> Dict:
-        return {
-            'signal': str(self.popups_multiple[self._signals[1]].get()),
-            'all': self.dict_checks[self._check_all_signals[1]].get(),
-            'taper1': int(self.entry_range[self._tapers[1]][0].get()),
-            'taper2': int(self.entry_range[self._tapers[1]][1].get()),
-            'fs': int(self.entries[self._sample_frequency[1]].get()),
-            'freq': float(self.popups[self._frequencies[1]].get()),
-            'time1': str(self._popups[self._idx1_signal[1]].get()),
-            'time2': str(self._popups[self._idx2_signal[1]].get()),
-        }
+        try:
+            return {
+                'signal': str(self.popups_multiple[self._signals[1]].get()),
+                'all': self.dict_checks[self._check_all_signals[1]].get(),
+                'taper1': int(self.entry_range[self._tapers[1]][0].get()),
+                'taper2': int(self.entry_range[self._tapers[1]][1].get()),
+                'fs': int(self.entries[self._sample_frequency[1]].get()),
+                'freq': float(self.popups[self._frequencies[1]].get()),
+                'time1': str(self._popups[self._idx1_signal[1]].get()),
+                'time2': str(self._popups[self._idx2_signal[1]].get()),
+            }
+        except:
+            return {
+                'signal': str(self.popups_multiple[self._signals[1]].get()),
+                'all': self.dict_checks[self._check_all_signals[1]].get(),
+                'taper1': int(self.entry_range[self._tapers[1]][0].get()),
+                'taper2': int(self.entry_range[self._tapers[1]][1].get()),
+                'fs': int(self.entries[self._sample_frequency[1]].get()),
+                'freq': str(self.popups[self._frequencies[1]].get()),
+                'time1': str(self._popups[self._idx1_signal[1]].get()),
+                'time2': str(self._popups[self._idx2_signal[1]].get()),
+            }

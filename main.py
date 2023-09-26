@@ -8,6 +8,7 @@ from Analysis.coherence_analysis import CoherenceAnalysis
 from Files.file import File
 from Plots.Plot import Plot
 from Utils.loading import Loading
+from Utils.alert import Alert
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab, frame_multi_analysis
 import constants as ctes
 

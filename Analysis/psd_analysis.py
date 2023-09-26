@@ -128,7 +128,10 @@ class PSDAnalysis(Analysis):
         taper2 = data['taper2']
         fs = data['fs']
         str_freq = data['freq']
-        freq = self.files.info_file.frequencies.index(str_freq) + 1
+        if str_freq != ctes.ALL:
+            freq = self.files.info_file.frequencies.index(str_freq) + 1
+        else:
+            freq = str_freq
         str_time1 = data['time1']
         time1 = self.files.info_file.times.index(str_time1)
         str_time2 = data['time2']
@@ -157,16 +160,22 @@ class PSDAnalysis(Analysis):
 
     def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> List[str]:
         if file is None:
-            data_in_freq = self.files.info_file.nex.iloc[freq]
+            data_in_freq = self.files.info_file.nex
         else:
-            data_in_freq = file.nex.iloc[freq]
+            data_in_freq = file.nex
         range1 = self._get_range(signal, time1, n) - 1
         range2 = self._get_range(signal, time2, n)
-        arr_signal = "["
-        for index in range(range1, range2):
-            arr_signal = arr_signal + str(data_in_freq.loc[index]) + " "
-        arr_signal = arr_signal + "]"
-        return arr_signal
+        columns = data_in_freq.iloc[range1:range2]
+        if freq == ctes.ALL:
+            data = columns.iloc[:]
+        else:
+            data = columns.iloc[:freq]
+        matlab_string = "["
+        for r, fila in data.iterrows():
+            matlab_string += " ".join(map(str, fila)) + "; "
+        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
+        matlab_string += "]"
+        return matlab_string
 
     def _get_range(self, i, car, n) -> int:
         return (2 + n * i) + car
