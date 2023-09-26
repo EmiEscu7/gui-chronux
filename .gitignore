@@ -176,5 +176,6 @@ pyrightconfig.json
 ExportData/
 Persist/
 Data/
+Convert/
 
 # End of https://www.toptal.com/developers/gitignore/api/python

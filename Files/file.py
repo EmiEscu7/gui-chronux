@@ -107,6 +107,7 @@ class File:
                 arr_path = self._path.split('/')
                 name = arr_path[len(arr_path)-1].split(".")[0]
                 ConvertMatlab().csv_to_matlab(self._path, name)
+                Alert("Finished", f'The matlab file is located in the ./Convert path with the name: {name}').show()
         else:
             pass
         Loading().change_state()
