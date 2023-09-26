@@ -1,4 +1,4 @@
-function [res] = PSDAnalysis(signal, taper1, taper2, fs)
+function [res] = PSDAnalysis2(taper1, taper2, fs, folder, file_name)
 %%
 % PSDAnalysis.m analyzes an lfp signal
 % Inputs:
@@ -14,22 +14,35 @@ function [res] = PSDAnalysis(signal, taper1, taper2, fs)
 %   psd: processed signal
 %   f: output frequency
     res = 0;
-    try
+    try        
+        
+        % Specify the path to your JSON file
+        jsonFilePath = "Data/Signal/signal.json";
+
+        % Read the JSON file
+        jsonData = jsondecode(fileread(jsonFilePath));
+        
+        signal = jsonData.signal;
+        
+        % Remove (delete) the JSON file
+        delete(jsonFilePath);
+        
         params = struct();
         params.tapers = [taper1 taper2];
         params.Fs = fs;
 
         % calculate pds to first frequency
         [psd, f] = mtspectrumc(signal, params);
-
+        
         % write data
         data.psd = psd;
         data.f = f;
+
         % Convierte la estructura de datos en formato JSON
         jsonString = jsonencode(data);
 
         % Especifica la ruta y el nombre de archivo para guardar el JSON
-        nombreArchivo = 'Data/psd_analisys.json';
+        nombreArchivo = convertCharsToStrings(folder) + convertCharsToStrings(file_name) + ".json";
 
         % Abre el archivo en modo de escritura
         fid = fopen(nombreArchivo, 'w');
@@ -42,7 +55,7 @@ function [res] = PSDAnalysis(signal, taper1, taper2, fs)
 
         res = 1;
     catch ME, ME.stack
-        disp("ERRROR: error meanwhile read file: " + path);
-        disp(ME.identifier);
-        disp(ME.message);
+        % disp("ERRROR: error meanwhile read file: " + path);
+        disp("ERROR_ID: " + ME.identifier);
+        disp("ERROR_MSG: " + ME.message);
     end
