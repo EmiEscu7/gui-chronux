@@ -48,11 +48,16 @@ class LFPFile(InfoFile):
         num_of_columns = len(self._nex.columns) - 1
         last_column_ncn = self._nex_column_names[num_of_columns]
         last_column_ncn_splitted = last_column_ncn[0][0].split()
-        self._duration = int(last_column_ncn_splitted[2].replace('s', ''))
         self._number_of_signals = int(last_column_ncn_splitted[0].replace('FP', ''))
         self._signals = self._get_signals()
         self._frequencies = self._get_freqs()
-        self._times = self._get_times()
+
+        len_n = self._nex.shape[1]
+        self._duration = int(len_n/self._number_of_signals)
+        if self._duration == 1:
+            self._times = ['1s', '1s']
+        else:
+            self._times = self._get_times()
 
     def _get_times(self) -> List[str]:
         times = []

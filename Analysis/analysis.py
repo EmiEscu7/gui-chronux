@@ -106,6 +106,7 @@ class Analysis(ABC):
 
     def analysis(self, funtion, signal, params) -> float:
         self._save_signal(signal)
+        print(f"disp({funtion}({params}))")
         process = subprocess.Popen(['matlab', '-batch', f"disp({funtion}({params}))"], stdout=subprocess.PIPE)
 
         output = process.communicate()[0]
