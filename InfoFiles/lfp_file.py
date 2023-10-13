@@ -74,10 +74,10 @@ class LFPFile(InfoFile):
         return signals[1:]
 
     def _get_freqs(self) -> List[float]:
-        freqs = []
-        for item in self._nex.loc[0].items():
-            freqs.append(item[1])
-        return freqs
+        try:
+            return list(self._nex.iloc[:,0])
+        except:
+            return []
     
     def show_info(self) -> List[Tuple[str, any]]:
         info = [('Name', self.file_name), ('Size', f"{self.size_file} MB"), ('Date', self.date_file),

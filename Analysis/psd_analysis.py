@@ -42,8 +42,6 @@ class PSDAnalysis(Analysis):
         self._load_default_params(self.files.info_file)
         signals = (ctes.POPUP_MULTIPLE, ('Signal'), self.files.info_file.signals, self.default_values['signal'])
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
-        # taper1 = (ctes.ENTRY, 'Taper 1', '', self.default_values['taper1'])
-        # taper2 = (ctes.ENTRY, 'Taper 2', '', self.default_values['taper2'])
         tapers = (ctes.ENTRY_RANGE, 'Tapers', '', self.default_values['taper1'], self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
         freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self.files.info_file.frequencies), self.default_values['freq'])
