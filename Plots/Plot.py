@@ -1,3 +1,4 @@
+import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -22,41 +23,11 @@ class Plot:
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
 
-        try:
-            f_max = max(f)
-            f_min = min(f)
-        except:
-            f_max = f + 100
-            f_min = f
-
-        try:
-            t_max = max(t)
-            t_min = min(t)
-        except:
-            t_max = int(t) + 100
-            t_min = t
-
-        # Define the number of time and frequency bins based on the shape of S
-        try:
-            num_time_bins = len(t)
-        except:
-            num_time_bins = 1
-
-        try:
-            num_freq_bins = len(f)
-        except:
-            num_freq_bins = 1
-
-        # Reshape S into a 2D array
-        s = s.reshape(num_freq_bins, num_time_bins)
-
-        pcm = ax.imshow(np.transpose(s), aspect='auto', origin='lower', cmap='viridis',
-                        extent=[t_min, t_max, f_min, f_max])
+        pcm = ax.imshow(np.array([s, t], dtype=float), aspect='auto', origin='lower', cmap='viridis',)
         plt.colorbar(pcm, ax=ax, label='Power Spectral Density (dB)')
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
         ax.set_title(title_plot, fontsize=16)
-        # ax.invert_yaxis()
 
         cls._add_plot_in_tab(fig, ax, tab_title)
 
@@ -101,13 +72,12 @@ class Plot:
         plt.savefig(path)
         plt.clf()
 
-    def get_color_plot(self, t, f, s, xlabel, ylabel, title_plot, path) -> None:
-        plt.pcolormesh(t, f, np.transpose(s))
-        plt.colorbar(label='dB')
+    def get_color_plot(self, t, f, s, xlabel, ylabel, title_plot, label_colorbar, path) -> None:
+        plt.imshow(np.array([s, t], dtype=float), aspect='auto', origin='lower', cmap='viridis', )
+        plt.colorbar(label=label_colorbar)
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
         plt.title(title_plot, fontsize=16)
-        # plt.gca().invert_yaxis()
 
         plt.savefig(path)
         plt.clf()

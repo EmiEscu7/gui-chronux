@@ -32,7 +32,7 @@ class Alert:
             master=frame,
             text=self._message,
             # text_color=ctes.BLACK,
-            text_color=ctes.WITHE,
+            text_color=ctes.BLACK,
             fg_color='transparent',
             anchor=ctk.NW,
             font=(ctes.FAMILY_FONT, ctes.SUBTITLE_SIZE),

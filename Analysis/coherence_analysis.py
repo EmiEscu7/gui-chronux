@@ -274,7 +274,7 @@ class CoherenceAnalysis(Analysis):
         t = data['t']
         f = data['f']
         path_img = f"{self._export_data_path}/{label}.png"
-        Plot().get_color_plot(t,f, 10 * np.log10(s),  'Time (s)', 'Frequency (Hz)', 'Signal Spectogram',
+        Plot().get_color_plot(t,f, 10 * np.log10(s),  'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', 'Coherence label colorbar',
                         path_img)
 
         layout = self._presentation.slide_layouts[5]

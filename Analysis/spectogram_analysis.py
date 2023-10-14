@@ -1,7 +1,6 @@
 from Analysis.analysis import Analysis
 from Parameters.spectogram_parameters import SpectogramParameters
-from Files.file import File
-from typing import List
+from Utils.alert import Alert
 import constants as ctes
 import json
 import numpy as np
@@ -21,6 +20,7 @@ class SpectogramAnalysis(Analysis):
         self._presentation = None
         self._export_data_path = './ExportData/Spectogram'
         self.data_compare = {}
+        self._path_imgs = []
 
     def _load_default_params(self, info_file) -> None:
         try:
@@ -34,7 +34,8 @@ class SpectogramAnalysis(Analysis):
                 'taper1': '5',
                 'taper2': '9',
                 'sample_freq': '200',
-                'freq': str(info_file.frequencies[0]),
+                'freq1': str(min(info_file.frequencies)),
+                'freq2': str(max(info_file.frequencies)),
                 'freq_pass1': '0',
                 'freq_pass2': '0',
                 'time1': info_file.times[0],
@@ -50,7 +51,7 @@ class SpectogramAnalysis(Analysis):
         movingwin = (ctes.ENTRY_RANGE, 'Mov. Window', '', self.default_values['movingwin1'], self.default_values['movingwin2'])
         tapers = (ctes.ENTRY_RANGE, 'Tapers', '', self.default_values['taper1'], self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
-        freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self.files.info_file.frequencies), self.default_values['freq'])
+        freqs = (ctes.ENTRY_RANGE, 'Frecuency', '', self.default_values['freq1'], self.default_values['freq2'])
         freq_pass = (ctes.ENTRY_RANGE, 'Freq. Band', '', self.default_values['freq_pass1'], self.default_values['freq_pass2'])
         time1 = (ctes.POPUP, ('Time 1'), self.files.info_file.times, self.default_values['time1'])
         time2 = (ctes.POPUP, ('Time 2'), self.files.info_file.times, self.default_values['time2'])
@@ -60,16 +61,14 @@ class SpectogramAnalysis(Analysis):
         self.parameters = SpectogramParameters(signals, check_all_signals, movingwin, tapers, fs, freqs, freq_pass, time1, time2, trialave, err)
 
 
-    def _generate_all(self, mw1, mw2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
+    def _generate_all(self, mw1, mw2, taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
         for signal, label in enumerate(self.files.info_file.signals):
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
+            signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
             res = self.spectogram_analysis(signal_matrix, mw1, mw2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
-                self._generate_pptx(f"{label} - Spectogram Plot", label)
+                self._generate_img_to_save(f"{label} - Spectogram Plot", label)
 
-            if self._presentation is not None:
-                self._presentation.save(f'{self._export_data_path}/{self.files.info_file.file_name}.pptx')
-                self._presentation = None
+        self._generate_pptx()
         Loading().change_state()
 
     def generate_all_files(self, files):
@@ -87,8 +86,10 @@ class SpectogramAnalysis(Analysis):
             taper1 = data['taper1']
             taper2 = data['taper2']
             fs = data['fs']
-            str_freq = data['freq']
-            freq = self.files.info_file.frequencies.index(str_freq) + 1
+            str_freq1 = data['freq1']
+            freq1 = self.files.info_file.frequencies.index(str_freq1) + 1
+            str_freq2 = data['freq2']
+            freq2 = self.files.info_file.frequencies.index(str_freq2) + 1
             freq_pass1 = data['freq_pass1']
             freq_pass2 = data['freq_pass2']
             str_time1 = data['time1']
@@ -99,7 +100,7 @@ class SpectogramAnalysis(Analysis):
             err = data['err']
             str_signal = data['signal']
             signal = self.files.info_file.signals.index(str_signal)
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
+            signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
             res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self._save_data_temp(file)
@@ -140,8 +141,10 @@ class SpectogramAnalysis(Analysis):
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
-        str_freq = data['freq']
-        freq = self.files.info_file.frequencies.index(str_freq) + 1
+        str_freq1 = data['freq1']
+        freq1 = self.files.info_file.frequencies.index(float(str_freq1)) + 1
+        str_freq2 = data['freq2']
+        freq2 = self.files.info_file.frequencies.index(float(str_freq2)) + 1
         freq_pass1 = data['freq_pass1']
         freq_pass2 = data['freq_pass2']
         str_time1 = data['time1']
@@ -152,21 +155,21 @@ class SpectogramAnalysis(Analysis):
         err = data['err']
         all_signals = data['all']
         if all_signals:
-            self._generate_all(movingwin1, movingwin2, taper1, taper2, fs, freq, freq_pass1, freq_pass2, time1, time2,trialave, err)
+            self._generate_all(movingwin1, movingwin2, taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2,trialave, err)
         else:
             str_signal = str(data['signal'])
             arr_signal = str_signal.split(",")
             if len(arr_signal) == 1:
                 signal = self.files.info_file.signals.index(str_signal)
-                signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-                res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1,freq_pass2, trialave, err)
+                signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+                res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                 if res == 1:
                     self._generate_plot(f"{self._number_session} - Spectogram Plot")
                 Loading().change_state()
             else:
                 for select_signal in arr_signal:
                     signal = self.files.info_file.signals.index(select_signal.strip())
-                    signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
+                    signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
                     res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                     if res == 1:
                         self._save_data_temp(select_signal)
@@ -174,7 +177,7 @@ class SpectogramAnalysis(Analysis):
 
 
 
-    def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> str:
+    def _get_signal_data(self, signal, freq1, freq2, time1, time2, n, file = None) -> str:
         if file is None:
             data_in_freq = self.files.info_file.nex
         else:
@@ -182,10 +185,7 @@ class SpectogramAnalysis(Analysis):
         range1 = self._get_range(signal, time1, n) - 1
         range2 = self._get_range(signal, time2, n)
         columns = data_in_freq.iloc[range1:range2]
-        if freq == ctes.ALL:
-            data = columns.iloc[:]
-        else:
-            data = columns.iloc[:freq]
+        data = columns.iloc[freq1:freq2]
         matlab_string = "["
         for r, fila in data.iterrows():
             matlab_string += " ".join(map(str, fila)) + "; "
@@ -235,7 +235,8 @@ class SpectogramAnalysis(Analysis):
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
-        freq = data['freq']
+        freq1 = data['freq1']
+        freq2 = data['freq2']
         freq_pass1 = data['freq_pass1']
         freq_pass2 = data['freq_pass2']
         time1 = data['time1']
@@ -250,7 +251,8 @@ class SpectogramAnalysis(Analysis):
             'taper1': str(taper1),
             'taper2': str(taper2),
             'sample_freq': str(fs),
-            'freq': str(freq),
+            'freq1': str(freq1),
+            'freq2': str(freq2),
             'freq_pass1': str(freq_pass1),
             'freq_pass2': str(freq_pass2),
             'time1': str(time1),
@@ -270,10 +272,7 @@ class SpectogramAnalysis(Analysis):
         for box in self.boxes:
             box.destroy()
 
-    def _generate_pptx(self, title, label):
-        if self._presentation is None:
-            self._presentation = Presentation()
-
+    def _generate_img_to_save(self, title, label):
         file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
         with open(file, 'r') as f:
             # read file content
@@ -289,17 +288,31 @@ class SpectogramAnalysis(Analysis):
         t = data['t']
         f = data['f']
         path_img = f"{self._export_data_path}/{label}.png"
-        Plot().get_color_plot(t,f, 10 * np.log10(s),  'Time (s)', 'Frequency (Hz)', 'Signal Spectogram',
+        Plot().get_color_plot(t,f, 10 * np.log10(s),  'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', 'Power Spectral Density (dB)',
                         path_img)
+        self._path_imgs.append([label, path_img])
 
-        layout = self._presentation.slide_layouts[5]
-        slide = self._presentation.slides.add_slide(layout)
+    def _generate_pptx(self):
 
-        slide.shapes.title.text = label
+        if self._presentation is None:
+            self._presentation = Presentation()
 
-        # Add the plot image to the slide
-        left = Inches(1.5)  # Adjust the positioning as needed
-        top = Inches(1.5)
-        height = Inches(5)
-        slide.shapes.add_picture(path_img, left, top, height=height)
-        os.remove(path_img)
+        for label, path in self._path_imgs:
+
+            layout = self._presentation.slide_layouts[5]
+            slide = self._presentation.slides.add_slide(layout)
+
+            slide.shapes.title.text = label
+
+            # Add the plot image to the slide
+            left = Inches(1.5)  # Adjust the positioning as needed
+            top = Inches(1.5)
+            height = Inches(5)
+            slide.shapes.add_picture(path, left, top, height=height)
+            os.remove(path)
+
+        if self._presentation is not None:
+            self._presentation.save(f'{self._export_data_path}/{self.files.info_file.file_name}.pptx')
+            self._presentation = None
+            Alert('Finished', f'File generated in {self._export_data_path}/{self.files.info_file.file_name}.pptx').show()
+        self._path_imgs = []
