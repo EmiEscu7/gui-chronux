@@ -1,6 +1,7 @@
 import tkinter
 
 import customtkinter as ctk
+from PIL import Image, ImageTk
 from typing import List, Tuple
 from Analysis.psd_analysis import PSDAnalysis
 from Analysis.spectogram_analysis import SpectogramAnalysis
@@ -254,6 +255,11 @@ def callback_psm():
 if __name__ == '__main__':
     gui = GUI()
     app = gui.load_gui("1366x768")
+    ico = Image.open(ctes.LOGO_APP)
+    photo = ImageTk.PhotoImage(ico)
+    app.wm_iconphoto(False, photo)
+    app.iconbitmap(ctes.LOGO_APP)
+    app.title('Mind Mapper')
     Loading(app, 1366, 768)
     app.mainloop()
 

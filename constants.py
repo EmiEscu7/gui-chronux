@@ -71,3 +71,5 @@ FOLDER_RES = './Data/'
 #ANALYSIS NAMES
 NAME_PSD = 'PSD Analysis'
 NAME_SPECTOGRAM = 'Spectogram Analysis'
+
+LOGO_APP = './assets/logo_mind_mapper_simple.ico'
