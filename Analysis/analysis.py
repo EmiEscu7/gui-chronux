@@ -3,7 +3,11 @@ from abc import ABC, abstractmethod
 from typing import Dict
 import constants as ctes
 import subprocess
+import os
 from Utils.loading import Loading
+from pptx import Presentation
+from pptx.util import Inches
+from Utils.alert import Alert
 
 
 class Analysis(ABC):
@@ -14,6 +18,8 @@ class Analysis(ABC):
         self._default_values = {}
         self._boxes = []
         self._files = None
+        self._path_imgs = []
+        self._presentation = None
 
     @property
     def files(self):
@@ -35,6 +41,10 @@ class Analysis(ABC):
     def parameters(self):
         return self._parameters
 
+    @property
+    def path_imgs(self):
+        return self._path_imgs
+
     @default_values.setter
     def default_values(self, value):
         self._default_values = value
@@ -54,6 +64,10 @@ class Analysis(ABC):
     @files.setter
     def files(self, value):
         self._files = value
+
+    @path_imgs.setter
+    def path_imgs(self, value):
+        self._path_imgs = value
 
     @abstractmethod
     def load_analysis(self) -> None:
@@ -137,3 +151,32 @@ class Analysis(ABC):
             print(decode.strip())
             Loading().change_state()
             return 0
+
+    @abstractmethod
+    def generate_img_to_save(self, title, label):
+        pass
+
+    def generate_pptx(self, export_data_path):
+
+        if self._presentation is None:
+            self._presentation = Presentation()
+
+        for label, path in self._path_imgs:
+
+            layout = self._presentation.slide_layouts[5]
+            slide = self._presentation.slides.add_slide(layout)
+
+            slide.shapes.title.text = label
+
+            # Add the plot image to the slide
+            left = Inches(1.5)  # Adjust the positioning as needed
+            top = Inches(1.5)
+            height = Inches(5)
+            slide.shapes.add_picture(path, left, top, height=height)
+            os.remove(path)
+
+        if self._presentation is not None:
+            self._presentation.save(f'{export_data_path}/{self.files.info_file.file_name}.pptx')
+            self._presentation = None
+            Alert('Finished', f'File generated in {export_data_path}/{self.files.info_file.file_name}.pptx').show()
+        self._path_imgs = []

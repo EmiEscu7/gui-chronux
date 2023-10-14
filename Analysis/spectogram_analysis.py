@@ -1,13 +1,10 @@
 from Analysis.analysis import Analysis
 from Parameters.spectogram_parameters import SpectogramParameters
-from Utils.alert import Alert
 import constants as ctes
 import json
 import numpy as np
 import os
 from Plots.Plot import Plot
-from pptx import Presentation
-from pptx.util import Inches
 from Utils.loading import Loading
 
 class SpectogramAnalysis(Analysis):
@@ -17,10 +14,8 @@ class SpectogramAnalysis(Analysis):
         self._file_name = 'analysis'
         self._number_session = 0
         self._path_persist = './Persist/Parameters/spectogram_default'
-        self._presentation = None
         self._export_data_path = './ExportData/Spectogram'
         self.data_compare = {}
-        self._path_imgs = []
 
     def _load_default_params(self, info_file) -> None:
         try:
@@ -66,9 +61,9 @@ class SpectogramAnalysis(Analysis):
             signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
             res = self.spectogram_analysis(signal_matrix, mw1, mw2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
-                self._generate_img_to_save(f"{label} - Spectogram Plot", label)
+                self.generate_img_to_save(f"{label} - Spectogram Plot", label)
 
-        self._generate_pptx()
+        self.generate_pptx(self._export_data_path)
         Loading().change_state()
 
     def generate_all_files(self, files):
@@ -272,7 +267,7 @@ class SpectogramAnalysis(Analysis):
         for box in self.boxes:
             box.destroy()
 
-    def _generate_img_to_save(self, title, label):
+    def generate_img_to_save(self, title, label):
         file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
         with open(file, 'r') as f:
             # read file content
@@ -290,29 +285,4 @@ class SpectogramAnalysis(Analysis):
         path_img = f"{self._export_data_path}/{label}.png"
         Plot().get_color_plot(t,f, 10 * np.log10(s),  'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', 'Power Spectral Density (dB)',
                         path_img)
-        self._path_imgs.append([label, path_img])
-
-    def _generate_pptx(self):
-
-        if self._presentation is None:
-            self._presentation = Presentation()
-
-        for label, path in self._path_imgs:
-
-            layout = self._presentation.slide_layouts[5]
-            slide = self._presentation.slides.add_slide(layout)
-
-            slide.shapes.title.text = label
-
-            # Add the plot image to the slide
-            left = Inches(1.5)  # Adjust the positioning as needed
-            top = Inches(1.5)
-            height = Inches(5)
-            slide.shapes.add_picture(path, left, top, height=height)
-            os.remove(path)
-
-        if self._presentation is not None:
-            self._presentation.save(f'{self._export_data_path}/{self.files.info_file.file_name}.pptx')
-            self._presentation = None
-            Alert('Finished', f'File generated in {self._export_data_path}/{self.files.info_file.file_name}.pptx').show()
-        self._path_imgs = []
+        self.path_imgs.append([label, path_img])

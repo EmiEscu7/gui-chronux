@@ -55,11 +55,9 @@ class PSDAnalysis(Analysis):
             signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
             res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
             if res == 1:
-                self._generate_pptx(f"{label} - Spectral Power Density (PSD)", label)
+                self.generate_img_to_save(f"{label} - Spectral Power Density (PSD)", label)
 
-        if self._presentation is not None:
-            self._presentation.save(f'{self._export_data_path}/{self.files.info_file.file_name}.pptx')
-            self._presentation = None
+        self.generate_pptx(self._export_data_path)
         Loading().change_state()
 
 
@@ -235,10 +233,7 @@ class PSDAnalysis(Analysis):
         for box in self.boxes:
             box.destroy()
 
-    def _generate_pptx(self, title, label):
-        if self._presentation is None:
-            self._presentation = Presentation()
-
+    def generate_img_to_save(self, title, label):
         file = f"{ctes.FOLDER_RES}PSD/{self._file_name}.json"
         with open(file, 'r') as f:
             # read file content
@@ -255,15 +250,4 @@ class PSDAnalysis(Analysis):
         path_img = f"{self._export_data_path}/{label}.png"
         Plot().get_line_plot(f, 10 * np.log10(psd), 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)',
                         path_img)
-
-        layout = self._presentation.slide_layouts[5]
-        slide = self._presentation.slides.add_slide(layout)
-
-        slide.shapes.title.text = label
-
-        # Add the plot image to the slide
-        left = Inches(1.5)  # Adjust the positioning as needed
-        top = Inches(1.5)
-        height = Inches(5)
-        slide.shapes.add_picture(path_img, left, top, height=height)
-        os.remove(path_img)
+        self.path_imgs.append([label, path_img])
