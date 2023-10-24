@@ -23,7 +23,30 @@ class Plot:
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
 
-        pcm = ax.imshow(np.array([s, t], dtype=float), aspect='auto', origin='lower', cmap='viridis',)
+        t_min, t_max, f_min, f_max = -1, -1, -1, -1
+
+        try:
+            t_min = min(t)
+        except:
+            t_min = t
+
+        try:
+            t_max = max(t)
+        except:
+            t_max = t + 15
+
+        try:
+            f_min = min(f)
+        except:
+            f_min = f
+
+        try:
+            f_max = max(f)
+        except:
+            f_max = f + 15
+
+        # s_log = 10 * np.log10(s)
+        pcm = ax.imshow(s, origin='lower', aspect='auto', cmap='viridis', extent=[t_min, t_max, f_min, f_max])
         plt.colorbar(pcm, ax=ax, label='Power Spectral Density (dB)')
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)

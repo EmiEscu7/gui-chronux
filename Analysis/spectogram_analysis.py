@@ -179,8 +179,7 @@ class SpectogramAnalysis(Analysis):
             data_in_freq = file.nex
         range1 = self._get_range(signal, time1, n) - 1
         range2 = self._get_range(signal, time2, n)
-        columns = data_in_freq.iloc[range1:range2]
-        data = columns.iloc[freq1:freq2]
+        data = data_in_freq.iloc[freq1:freq2, range1:range2]
         matlab_string = "["
         for r, fila in data.iterrows():
             matlab_string += " ".join(map(str, fila)) + "; "
