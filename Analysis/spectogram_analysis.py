@@ -70,7 +70,6 @@ class SpectogramAnalysis(Analysis):
         Loading().start(self.generate_all_files_th, (files,))
 
     def generate_all_files_th(self, files):
-        current_file = None
         for file in files:
             current_file = self.files.get_specific_file(file)
             if current_file.get_parameters() is not None and len(current_file.get_parameters()) > 0:
@@ -83,9 +82,9 @@ class SpectogramAnalysis(Analysis):
             taper2 = data['taper2']
             fs = data['fs']
             str_freq1 = data['freq1']
-            freq1 = self.files.info_file.frequencies.index(str_freq1) + 1
+            freq1 = self.files.info_file.frequencies.index(float(str_freq1)) + 1
             str_freq2 = data['freq2']
-            freq2 = self.files.info_file.frequencies.index(str_freq2) + 1
+            freq2 = self.files.info_file.frequencies.index(float(str_freq2)) + 1
             freq_pass1 = data['freq_pass1']
             freq_pass2 = data['freq_pass2']
             str_time1 = data['time1']
@@ -101,8 +100,8 @@ class SpectogramAnalysis(Analysis):
             if res == 1:
                 self._save_data_temp(file)
 
-        if(current_file is not None):
-            self._generate_plot_all_files(current_file.info_file.file_name)
+        self._generate_plot_all_files(files)
+
 
     def _save_data_temp(self, name_file):
         file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
@@ -122,9 +121,17 @@ class SpectogramAnalysis(Analysis):
         }
         self.data_compare[name_file] = to_save
 
-    def _generate_plot_all_files(self, title):
-        self._number_session += 1
-        Plot().add_multi_color_plot(self.data_compare, 'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', title)
+    def _generate_plot_all_files(self, iter):
+        for i in iter:
+            data = self.data_compare[i]
+            # get data
+            s = data['S']
+            t = data['t']
+            f = data['f']
+
+            # show plot
+            self._number_session += 1
+            Plot().add_color_plot(t, f, s, 'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', i)
         self.data_compare = {}
         Loading().change_state()
 
@@ -170,7 +177,7 @@ class SpectogramAnalysis(Analysis):
                     res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                     if res == 1:
                         self._save_data_temp(select_signal)
-                self._generate_plot_all_files(self.files.info_file.file_name)
+                self._generate_plot_all_files(arr_signal)
 
 
     def spectogram_analysis(self, signal, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err):

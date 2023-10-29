@@ -11,6 +11,7 @@ from Plots.Plot import Plot
 from Utils.loading import Loading
 from frames_gui import frame_load_files, frame_parameters, frame_type_analysis, frame_info_file, tabview_frame, get_frame_tab, frame_multi_analysis
 import constants as ctes
+from Utils.alert import Alert
 
 
 class GUI:
@@ -27,9 +28,13 @@ class GUI:
         self._tabview = None
 
     def add_tab(self, tab_name, data: List[Tuple[str, any]]):
-        self._tabview.add(tab_name)
-        frame_tab = get_frame_tab(self._tabview.tab(tab_name), data)
-        frame_tab.pack()
+        try:
+            self._tabview.add(tab_name)
+            frame_tab = get_frame_tab(self._tabview.tab(tab_name), data)
+            frame_tab.pack()
+        except:
+            Alert('Error', f'File {tab_name} already has loaded.').show()
+            Loading().change_state()
 
     def callback_save_params(self):
         self._analysis.save_params()

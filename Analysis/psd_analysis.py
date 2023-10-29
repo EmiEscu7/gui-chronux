@@ -211,6 +211,8 @@ class PSDAnalysis(Analysis):
         freq_pass2 = data['freq_pass2']
         time1 = data['time1']
         time2 = data['time2']
+        trialave = data['trialave']
+        err = data['err']
 
         self.default_values = {
             'signal': signal,
@@ -223,6 +225,8 @@ class PSDAnalysis(Analysis):
             'freq_pass2': str(freq_pass2),
             'time1': str(time1),
             'time2': str(time2),
+            'trialave': str(trialave),
+            'err': str(err)
         }
 
     def save_params(self) -> None:
