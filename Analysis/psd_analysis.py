@@ -33,9 +33,14 @@ class PSDAnalysis(Analysis):
                 'taper1': '3',
                 'taper2': '5',
                 'sample_freq': '200',
-                'freq': str(info_file.frequencies[0]),
+                'freq1': str(min(info_file.frequencies)),
+                'freq2': str(max(info_file.frequencies)),
+                'freq_pass1': '0',
+                'freq_pass2': '0',
                 'time1': info_file.times[0],
                 'time2': info_file.times[len(info_file.times) - 1],
+                'trialave': '0',
+                'err': '1',
             }
 
     def load_analysis(self) -> None:
@@ -44,16 +49,19 @@ class PSDAnalysis(Analysis):
         check_all_signals = (ctes.CHECKBOX, 'All Signals', False, False)
         tapers = (ctes.ENTRY_RANGE, 'Tapers', '', self.default_values['taper1'], self.default_values['taper2'])
         fs = (ctes.ENTRY, 'Frequency sample', '', self.default_values['sample_freq'])
-        freqs = (ctes.POPUP, ('Frequency'), self.as_tuple(self.files.info_file.frequencies), self.default_values['freq'])
+        freqs = (ctes.ENTRY_RANGE, 'Frequency', '', self.default_values['freq1'], self.default_values['freq2'])
+        freq_pass = (ctes.ENTRY_RANGE, 'Freq. Band', '', self.default_values['freq_pass1'], self.default_values['freq_pass2'])
         idx1 = (ctes.POPUP, ('Time 1'), self.files.info_file.times, self.default_values['time1'])
         idx2 = (ctes.POPUP, ('Time 2'), self.files.info_file.times, self.default_values['time2'])
+        trialave = (ctes.ENTRY, 'Trialave', '', self.default_values['trialave'])
+        err = (ctes.ENTRY, 'Error', '', self.default_values['err'])
 
-        self.parameters = PSDParameters(signals, check_all_signals, tapers, fs, freqs, idx1, idx2)
+        self.parameters = PSDParameters(signals, check_all_signals, tapers, fs, freqs, freq_pass, idx1, idx2, trialave, err)
 
-    def _generate_all(self, taper1, taper2, fs, freq, time1, time2):
+    def _generate_all(self, taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2, trialave, err):
         for signal, label in enumerate(self.files.info_file.signals):
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+            res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self.generate_img_to_save(f"{label} - Spectral Power Density (PSD)", label)
 
@@ -75,16 +83,22 @@ class PSDAnalysis(Analysis):
             taper1 = data['taper1']
             taper2 = data['taper2']
             fs = data['fs']
-            str_freq = data['freq']
-            freq = current_file.frequencies.index(str_freq) + 1
+            str_freq1 = data['freq1']
+            freq1 = self.files.info_file.frequencies.index(str_freq1) + 1
+            str_freq2 = data['freq2']
+            freq2 = self.files.info_file.frequencies.index(str_freq2) + 1
+            freq_pass1 = data['freq_pass1']
+            freq_pass2 = data['freq_pass2']
             str_time1 = data['time1']
-            time1 = current_file.times.index(str_time1)
+            time1 = self.files.info_file.times.index(str_time1)
             str_time2 = data['time2']
-            time2 = current_file.times.index(str_time2)
+            time2 = self.files.info_file.times.index(str_time2)
+            trialave = data['trialave']
+            err = data['err']
             str_signal = data['signal']
             signal = current_file.signals.index(str_signal)
-            signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(current_file.times), current_file)
-            res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+            signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(current_file.times), current_file)
+            res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self._save_data_temp(file)
 
@@ -123,63 +137,46 @@ class PSDAnalysis(Analysis):
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
-        str_freq = data['freq']
-        if str_freq != ctes.ALL:
-            freq = self.files.info_file.frequencies.index(str_freq) + 1
-        else:
-            freq = str_freq
+        str_freq1 = data['freq1']
+        freq1 = self.files.info_file.frequencies.index(float(str_freq1)) + 1
+        str_freq2 = data['freq2']
+        freq2 = self.files.info_file.frequencies.index(float(str_freq2)) + 1
+        freq_pass1 = data['freq_pass1']
+        freq_pass2 = data['freq_pass2']
         str_time1 = data['time1']
         time1 = self.files.info_file.times.index(str_time1)
         str_time2 = data['time2']
         time2 = self.files.info_file.times.index(str_time2)
+        trialave = data['trialave']
+        err = data['err']
         all_signals = data['all']
         if all_signals:
-            self._generate_all(taper1, taper2, fs, freq, time1, time2)
+            self._generate_all(taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2)
         else:
             str_signal = str(data['signal'])
             arr_signal = str_signal.split(",")
             if len(arr_signal) == 1:
                 signal = self.files.info_file.signals.index(arr_signal[0].strip())
-                signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-                res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+                signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+                res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                 if res == 1:
                     self._generate_plot(f"{self._number_session} - {self.files.info_file.file_name} - Spectral Power Density (PSD)")
                 Loading().change_state()
             else:
                 for select_signal in arr_signal:
                     signal = self.files.info_file.signals.index(select_signal.strip())
-                    signal_matrix = self._get_signal_data(signal, freq, time1, time2, len(self.files.info_file.times))
-                    res = self.psd_analysis(signal_matrix, taper1, taper2, fs)
+                    signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+                    res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                     if res == 1:
                         self._save_data_temp(select_signal)
                 self._generate_plot_all_files()
 
-    def _get_signal_data(self, signal, freq, time1, time2, n, file = None) -> List[str]:
-        if file is None:
-            data_in_freq = self.files.info_file.nex
-        else:
-            data_in_freq = file.nex
-        range1 = self._get_range(signal, time1, n) - 1
-        range2 = self._get_range(signal, time2, n)
-        columns = data_in_freq.iloc[range1:range2]
-        if freq == ctes.ALL:
-            data = columns.iloc[:]
-        else:
-            data = columns.iloc[:freq]
-        matlab_string = "["
-        for r, fila in data.iterrows():
-            matlab_string += " ".join(map(str, fila)) + "; "
-        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
-        matlab_string += "]"
-        return matlab_string
-
-    def _get_range(self, i, car, n) -> int:
-        return (2 + n * i) + car
-
-    def psd_analysis(self, signal, taper1, taper2, fs) -> float:
+    def psd_analysis(self, signal, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err) -> float:
         # Execute MATLAB in CMD and capture output
         # function = f"PSDAnalysis2({signal}, "
-        params = f"{taper1}, {taper2}, {fs}, '{ctes.FOLDER_RES + 'PSD/'}', '{self._file_name}'"
+        tapers = f'[{taper1} {taper2}]'
+        fpass = f'[{freq_pass1} {freq_pass2}]'
+        params = f"{tapers}, {fpass}, {fs}, {trialave}, {err}, '{ctes.FOLDER_RES + 'PSD/'}', '{self._file_name}'"
         return self.analysis('PSDAnalysis2', signal=signal, params=params)
 
     def _generate_plot(self, title) -> None:
@@ -208,7 +205,10 @@ class PSDAnalysis(Analysis):
         taper1 = data['taper1']
         taper2 = data['taper2']
         fs = data['fs']
-        freq = data['freq']
+        freq1 = data['freq1']
+        freq2 = data['freq2']
+        freq_pass1 = data['freq_pass1']
+        freq_pass2 = data['freq_pass2']
         time1 = data['time1']
         time2 = data['time2']
 
@@ -217,7 +217,10 @@ class PSDAnalysis(Analysis):
             'taper1': str(taper1),
             'taper2': str(taper2),
             'sample_freq': str(fs),
-            'freq': str(freq),
+            'freq1': str(freq1),
+            'freq2': str(freq2),
+            'freq_pass1': str(freq_pass1),
+            'freq_pass2': str(freq_pass2),
             'time1': str(time1),
             'time2': str(time2),
         }

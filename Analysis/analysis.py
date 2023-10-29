@@ -180,3 +180,21 @@ class Analysis(ABC):
             self._presentation = None
             Alert('Finished', f'File generated in {export_data_path}/{self.files.info_file.file_name}.pptx').show()
         self._path_imgs = []
+
+    def get_signal_data(self, signal, freq1, freq2, time1, time2, n, file = None) -> str:
+        if file is None:
+            data_in_freq = self.files.info_file.nex
+        else:
+            data_in_freq = file.nex
+        range1 = self._get_range(signal, time1, n) - 1
+        range2 = self._get_range(signal, time2, n)
+        data = data_in_freq.iloc[freq1:freq2, range1:range2]
+        matlab_string = "["
+        for r, fila in data.iterrows():
+            matlab_string += " ".join(map(str, fila)) + "; "
+        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
+        matlab_string += "]"
+        return matlab_string
+
+    def _get_range(self, i, car, n) -> int:
+        return (2 + n * i) + car

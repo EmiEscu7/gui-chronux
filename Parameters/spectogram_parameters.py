@@ -9,16 +9,10 @@ class SpectogramParameters(Parameters):
             self,
             signals: Tuple[int, str, List[str], any] = None,
             check_all_signals: Tuple[int, str, bool, any] = None,
-            # movingwin1: Tuple[int, str, any, any] = None,
-            # movingwin2: Tuple[int, str, any, any] = None,
             movingwin: Tuple[int, str, any, any, any] = None,
-            # taper1: Tuple[int, str, any, any] = None,
-            # taper2: Tuple[int, str, any, any] = None,
             tapers: Tuple[int, str, any, any, any] = None,
             sample_frequency: Tuple[int, str, any, any] = None,
             frequencies: Tuple[int, str, any, any] = None,
-            # freq_pass1: Tuple[int, str, any, any] = None,
-            # freq_pass2: Tuple[int, str, any, any] = None,
             freq_pass: Tuple[int, str, any, any, any] = None,
             time1: Tuple[int, str, any, any] = None,
             time2: Tuple[int, str, any, any] = None,
@@ -28,16 +22,10 @@ class SpectogramParameters(Parameters):
         super().__init__()
         self._signals = signals
         self._check_all_signals = check_all_signals
-        # self._movingwin1 = movingwin1
-        # self._movingwin2 = movingwin2
         self._movingwin = movingwin
-        # self._taper1 = taper1
-        # self._taper2 = taper2
         self._tapers = tapers
         self._sample_frequency = sample_frequency
         self._frequencies = frequencies
-        # self._freq_pass1 = freq_pass1
-        # self._freq_pass2 = freq_pass2
         self._freq_pass = freq_pass
         self._time1 = time1
         self._time2 = time2

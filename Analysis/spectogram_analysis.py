@@ -58,7 +58,7 @@ class SpectogramAnalysis(Analysis):
 
     def _generate_all(self, mw1, mw2, taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
         for signal, label in enumerate(self.files.info_file.signals):
-            signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+            signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
             res = self.spectogram_analysis(signal_matrix, mw1, mw2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self.generate_img_to_save(f"{label} - Spectogram Plot", label)
@@ -70,6 +70,7 @@ class SpectogramAnalysis(Analysis):
         Loading().start(self.generate_all_files_th, (files,))
 
     def generate_all_files_th(self, files):
+        current_file = None
         for file in files:
             current_file = self.files.get_specific_file(file)
             if current_file.get_parameters() is not None and len(current_file.get_parameters()) > 0:
@@ -95,12 +96,13 @@ class SpectogramAnalysis(Analysis):
             err = data['err']
             str_signal = data['signal']
             signal = self.files.info_file.signals.index(str_signal)
-            signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+            signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
             res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self._save_data_temp(file)
 
-        self._generate_plot_all_files(current_file.info_file.file_name)
+        if(current_file is not None):
+            self._generate_plot_all_files(current_file.info_file.file_name)
 
     def _save_data_temp(self, name_file):
         file = f"{ctes.FOLDER_RES}Spectogram/{self._file_name}.json"
@@ -156,7 +158,7 @@ class SpectogramAnalysis(Analysis):
             arr_signal = str_signal.split(",")
             if len(arr_signal) == 1:
                 signal = self.files.info_file.signals.index(str_signal)
-                signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+                signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
                 res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                 if res == 1:
                     self._generate_plot(f"{self._number_session} - Spectogram Plot")
@@ -164,32 +166,12 @@ class SpectogramAnalysis(Analysis):
             else:
                 for select_signal in arr_signal:
                     signal = self.files.info_file.signals.index(select_signal.strip())
-                    signal_matrix = self._get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
+                    signal_matrix = self.get_signal_data(signal, freq1, freq2, time1, time2, len(self.files.info_file.times))
                     res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                     if res == 1:
                         self._save_data_temp(select_signal)
                 self._generate_plot_all_files(self.files.info_file.file_name)
 
-
-
-    def _get_signal_data(self, signal, freq1, freq2, time1, time2, n, file = None) -> str:
-        if file is None:
-            data_in_freq = self.files.info_file.nex
-        else:
-            data_in_freq = file.nex
-        range1 = self._get_range(signal, time1, n) - 1
-        range2 = self._get_range(signal, time2, n)
-        data = data_in_freq.iloc[freq1:freq2, range1:range2]
-        matlab_string = "["
-        for r, fila in data.iterrows():
-            matlab_string += " ".join(map(str, fila)) + "; "
-        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
-        matlab_string += "]"
-        return matlab_string
-
-
-    def _get_range(self, i, car, n) -> int:
-        return (2 + n * i) + car
 
     def spectogram_analysis(self, signal, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err):
         # Execute MATLAB in CMD and capture output
