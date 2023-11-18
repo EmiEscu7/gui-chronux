@@ -6,6 +6,7 @@ from typing import List, Tuple
 from Analysis.psd_analysis import PSDAnalysis
 from Analysis.spectogram_analysis import SpectogramAnalysis
 from Analysis.coherence_analysis import CoherenceAnalysis
+from Analysis.multiple_psd_analysis import MultiplePSDAnalysis
 from Files.file import File
 from Plots.Plot import Plot
 from Utils.loading import Loading
@@ -49,12 +50,15 @@ class GUI:
             self._analysis = SpectogramAnalysis()
         elif choice == 'Coherence Analysis':
             self._analysis = CoherenceAnalysis()
+        elif choice == 'Multiple PSD Analysis':
+            self._analysis = MultiplePSDAnalysis()
 
         if self._analysis is not None:
             self._analysis.files = self._load_files
             self._analysis.load_analysis()
             self._analysis.show_params(self._frame_params)
-            self._load_files.info_file.set_parameters(self._analysis)
+            if self._load_files.info_file is not None:
+                self._load_files.info_file.set_parameters(self._analysis)
 
     def multi_analysis(self):
 

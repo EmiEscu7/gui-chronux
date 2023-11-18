@@ -22,6 +22,7 @@ class Parameters(ABC):
         self._dict_checks = {}
         self._popups_multiple = {}
         self._entry_range = {}
+        self._dict_radio = {}
 
     @property
     def dict_checks(self):
@@ -46,6 +47,10 @@ class Parameters(ABC):
     @property
     def entry_range(self):
         return self._entry_range
+
+    @property
+    def dict_radio(self):
+        return self._dict_radio
 
     def load_params(self, master, attrbs) -> List[Union[CTkCheckBox, CTkComboBox, CTkRadioButton, CTkTextbox, CTkEntry]]:
         params = []
@@ -96,6 +101,7 @@ class Parameters(ABC):
                 combo = cmbbox.get_item()
                 params.append(combo)
             elif input_type == ctes.RADIOBUTTON:
+                self._dict_radio[atr[1]] = tk.IntVar(value=atr[3][0])
                 radiobtn = RadiobuttonInput(
                     master=master,
                     width=ctes.INPUT_WIDTH,
@@ -107,9 +113,10 @@ class Parameters(ABC):
                     radiobutton_width=ctes.RB_WIDTH,
                     radiobutton_height=ctes.RB_HEIGHT,
                     text=atr[1],
-                    variable=tk.StringVar(value=''),
+                    variable=tk.IntVar(value=atr[3][0]),
                     value=atr[2],
                 )
+                self._dict_radio[atr[1]].set(atr[3][0])
                 radiobutton = radiobtn.get_item()
                 params.append(radiobutton)
             elif input_type == ctes.TEXTBOX:
@@ -207,6 +214,9 @@ class Parameters(ABC):
 
     def destroy(self):
         self._dict_combo = {}
-        self._popups = {}
         self._entries = {}
+        self._popups = {}
+        self._dict_checks = {}
         self._popups_multiple = {}
+        self._entry_range = {}
+        self._dict_radio = {}

@@ -41,8 +41,8 @@ class LFPFile(InfoFile):
         self._nex_column_names = pd.DataFrame(self._file['nexColumnNames'])
 
         # frequency info
-        self._min_freq = round(min(self._nex[0]), 2)
-        self._max_freq = round(max(self._nex[0]), 2)
+        self._min_freq = round(min(self._nex.iloc[:, 0]), 2)
+        self._max_freq = round(max(self._nex.iloc[:, 0]), 2)
 
         # extra info
         num_of_columns = len(self._nex.columns) - 1

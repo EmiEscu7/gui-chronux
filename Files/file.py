@@ -3,6 +3,7 @@ import customtkinter as ctk
 import tkinter as tk
 import constants as ctes
 from InfoFiles.lfp_file import LFPFile
+from InfoFiles.spike_file import SpikeFile
 from PIL import Image
 from Utils.loading import Loading
 from InfoFiles.info_file import InfoFile
@@ -82,7 +83,7 @@ class File:
         frame_sf.pack()
 
     def select_file(self) -> None:
-        if self._type_file.get() == ctes.TYPE_FILES[0] or self._type_file.get() == ctes.TYPE_FILES[2]:
+        if self._type_file.get() == ctes.TYPE_FILES[2]:
             Alert("Functionality not implemented", "This functionality is currently under development").show()
             return
         self._info_file = None
@@ -95,7 +96,14 @@ class File:
         return self._info_file
 
     def last_step(self):
-        if self._type_file.get() == ctes.TYPE_FILES[1]:
+        if self._type_file.get() == ctes.TYPE_FILES[0]:
+            if self._path is not None and self._path != '':
+                self._info_file = SpikeFile(self._path)
+            if self._info_file is not None:
+                self._info_file.extract_info()
+                self._all_files[self._info_file.file_name] = self._info_file
+            self._fn_show()
+        elif self._type_file.get() == ctes.TYPE_FILES[1]:
             if self._path is not None and self._path != '':
                 self._info_file = LFPFile(self._path)
             if self._info_file is not None:

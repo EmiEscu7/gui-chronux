@@ -14,7 +14,7 @@ BG_HEADER_COLOR = '#A6DDF5'
 # FONTS
 FAMILY_FONT = 'roboto'
 
-TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis', 'Coherence Analysis']
+TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis', 'Coherence Analysis', 'Multiple PSD Analysis']
 TYPE_FILES = ['Spike - Matlab', 'LFP - Matlab', 'Spike - CSV', 'LFP - CSV']
 
 # SIZES
@@ -71,5 +71,6 @@ FOLDER_RES = './Data/'
 #ANALYSIS NAMES
 NAME_PSD = 'PSD Analysis'
 NAME_SPECTOGRAM = 'Spectogram Analysis'
+NAME_MULTIPLE_PSD = 'Multiple PSD Analysis'
 
 LOGO_APP = './assets/logo_mind_mapper_simple.ico'

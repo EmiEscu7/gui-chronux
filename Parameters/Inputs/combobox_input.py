@@ -74,7 +74,7 @@ class ComboboxInput(Input):
 
         combo = ctk.CTkComboBox(
             master=frame,
-            width=self.width,
+            width=(self.width / 2) - 10,
             height=self.height,
             corner_radius=self.corner_radius,
             fg_color=self.fg_color,
