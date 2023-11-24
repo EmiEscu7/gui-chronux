@@ -1,8 +1,10 @@
 import json
+import os
+from Plots.Plot import Plot
 from Parameters.multiple_psd_parameters import MultiplePSDParameters
 from Analysis.analysis import Analysis
 import constants as ctes
-
+from Utils.loading import Loading
 class MultiplePSDAnalysis(Analysis):
 
     def __init__(self):
@@ -12,6 +14,8 @@ class MultiplePSDAnalysis(Analysis):
         self._path_persist = './Persist/Parameters/multiple_psd_params'
         self._presentation = None
         self._export_data_path = './ExportData/MultiplePSD'
+        self._folder = './Data/MultiplePSD/'
+        self._number_session = 1
 
     def _load_default_params(self, info_file) -> None:
         try:
@@ -34,9 +38,55 @@ class MultiplePSDAnalysis(Analysis):
 
         self.parameters = MultiplePSDParameters(path_excel, animal_type, path_folder, phase_period)
 
+    def animal_number(self, animal_type) -> int:
+        if animal_type == 'Presser':
+            return 1
+        elif animal_type == 'NonPresser':
+            return 2
+        return 0
+
+    def phase_number(self, phase_period) -> int:
+        if phase_period == 'Reward':
+            return 1
+        elif phase_period == 'Odor':
+            return 2
+        elif phase_period == 'Conflict':
+            return 3
+        return 0
 
     def generate(self) -> None:
-        pass
+        Loading().start(self.generate_th)
+
+    def _generate_plot(self):
+        file = f"{ctes.FOLDER_RES}MultiplePSD/{self._file_name}.json"
+        with open(file, "r") as f:
+            content = f.read()
+            data = json.loads(content)
+
+        os.remove(file)
+        x = [float(d) for d in data['x'].split()]
+        a = [float(x) for x in data['a']]
+        b1 = [float(x) for x in data['b1']]
+        b2 = [float(x) for x in data['b2']]
+
+        data = self.get_value_parameters()
+        animal_type = data['animal_type']
+        phase_period = data['phase_period']
+        title_plot = f"{animal_type} - {phase_period}"
+        Plot().add_plot_multiple_psd(x, a, b1, b2, title_plot, 'Power Spectral Density (%)', 'Frequency (Hz)', f"{self._number_session} - {title_plot}")
+        self._number_session += 1
+
+    def generate_th(self):
+        data = self.get_value_parameters()
+        animal_type = data['animal_type']
+        path_excel = data['path_excel']
+        phase_period = data['phase_period']
+        path_folder = data['path_folder']
+        params = f"'{path_excel}', {self.animal_number(animal_type)}, '{path_folder}', {self.phase_number(phase_period)}, '{self._folder}', '{self._file_name}'"
+        res = super().analysis('multiplePSD', None, params)
+        if res == 1.0:
+            self._generate_plot()
+        Loading().change_state()
 
     def save_params_session(self):
         data = self.get_value_parameters()

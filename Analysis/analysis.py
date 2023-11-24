@@ -119,18 +119,21 @@ class Analysis(ABC):
             f.write(json.dumps({'data1': signal1, 'data2': signal2}))
 
     def analysis(self, funtion, signal, params) -> float:
-        self._save_signal(signal)
+        if signal is not None:
+            self._save_signal(signal)
         process = subprocess.Popen(['matlab', '-batch', f"disp({funtion}({params}))"], stdout=subprocess.PIPE)
 
         output = process.communicate()[0]
         decode = output.decode()
         if "ERROR" in decode:
+            print(f"{funtion}({params})")
             print(decode)
             return 0.0
         try:
             result = float(decode.strip())
             return result
         except:
+            print(f"{funtion}({params})")
             print(decode.strip())
             Loading().change_state()
             return 0

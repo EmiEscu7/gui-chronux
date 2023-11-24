@@ -86,6 +86,20 @@ class Plot:
 
         cls._add_plot_in_tab(fig, ax, title)
 
+    def add_plot_multiple_psd(cls, x, a, b1, b2, title_plot, xlabel, ylabel, title_tab):
+        fig = Figure(figsize=(7,6), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.plot(np.transpose(x), np.transpose(a))
+
+        ax.set_title(title_plot, fontsize=16)
+        ax.set_xlabel(xlabel, fontsize=12)
+        ax.set_ylabel(ylabel, fontsize=12)
+
+        ax.fill_between(np.transpose(x), np.transpose(b1), np.transpose(b2), color='blue', alpha=0.3,
+                         label='Area between curves')
+
+        cls._add_plot_in_tab(fig, ax, title_tab)
+
     def get_line_plot(cls, x, y, xlabel, ylabel, title_plot, path) -> None:
         plt.plot(x, y)
         plt.title(title_plot, fontsize=16)
