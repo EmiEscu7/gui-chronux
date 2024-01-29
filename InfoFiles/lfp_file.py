@@ -48,7 +48,12 @@ class LFPFile(InfoFile):
         num_of_columns = len(self._nex.columns) - 1
         last_column_ncn = self._nex_column_names[num_of_columns]
         last_column_ncn_splitted = last_column_ncn[0][0].split()
-        self._number_of_signals = int(last_column_ncn_splitted[0].replace('FP', ''))
+        if 'FP' in last_column_ncn_splitted[0]:
+            self._number_of_signals = int(last_column_ncn_splitted[0].replace('FP', ''))
+        elif 'EVT' in last_column_ncn_splitted[0]:
+            self._number_of_signals = int(last_column_ncn_splitted[0].replace('EVT', ''))
+        else:
+            self._number_of_signals = -1
         self._signals = self._get_signals()
         self._frequencies = self._get_freqs()
 
@@ -63,7 +68,13 @@ class LFPFile(InfoFile):
         times = []
         size = int(len(self._nex.columns)/len(self._signals)) +1
         for index in range(1, size):
-            times.append(self._nex_column_names.loc[0][index][0].split()[2].strip())
+            try:
+                if len(self._nex_column_names.loc[0][index][0].split()) > 1:
+                    times.append(self._nex_column_names.loc[0][index][0].split()[2].strip())
+                else:
+                    times.append(self._nex_column_names.loc[0][index][0].strip())
+            except:
+                print("ERROR")
         return times
 
     def _get_signals(self) -> List[str]:

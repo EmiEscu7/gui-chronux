@@ -19,7 +19,7 @@ class Plot:
             cls._plots = {}
         return cls._instance
 
-    def add_color_plot(cls, t, f, s, xlabel, ylabel, title_plot, tab_title):
+    def add_color_plot(cls, t, f, s, xlabel, ylabel,  title_plot, tab_title):
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
 
@@ -46,11 +46,14 @@ class Plot:
             f_max = f + 15
 
         # s_log = 10 * np.log10(s)
+        print([t_min, t_max, f_min, f_max])
         pcm = ax.imshow(s, origin='lower', aspect='auto', cmap='viridis', extent=[t_min, t_max, f_min, f_max])
         plt.colorbar(pcm, ax=ax, label='Power Spectral Density (dB)')
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
         ax.set_title(title_plot, fontsize=16)
+        # ax.set_ylim(min(f), max(f))
+        # ax.set_xlim(min(t), max(t))
 
         cls._add_plot_in_tab(fig, ax, tab_title)
 
@@ -86,7 +89,7 @@ class Plot:
 
         cls._add_plot_in_tab(fig, ax, title)
 
-    def add_plot_multiple_psd(cls, x, a, b1, b2, title_plot, xlabel, ylabel, title_tab):
+    def add_plot_multiple_psd(cls, x, a, b1, b2, title_plot, xlabel, ylabel, title_tab, set_limits = True):
         fig = Figure(figsize=(7,6), dpi=100)
         ax = fig.add_subplot(111)
         ax.plot(np.transpose(x), np.transpose(a))
@@ -94,6 +97,14 @@ class Plot:
         ax.set_title(title_plot, fontsize=16)
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
+
+        if set_limits:
+            min_xlim = min(x)
+            max_xlim = max(x)
+            ax.set_xlim(min_xlim - 10**(len(str(int(min_xlim)))-1) if min_xlim > 0 else min_xlim, max_xlim + 10**(len(str(int(max_xlim)))-1) if max_xlim > 0 else max_xlim)
+            min_alim = min(a)
+            max_alim = max(a)
+            ax.set_ylim(min_alim - 10**(len(str(int(min_alim)))-1) if min_alim > 0 else min_alim, max_alim + 10**(len(str(int(max_alim)))-1) if max_alim > 0 else max_alim)
 
         ax.fill_between(np.transpose(x), np.transpose(b1), np.transpose(b2), color='blue', alpha=0.3,
                          label='Area between curves')

@@ -1,9 +1,10 @@
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, askdirectory
 import customtkinter as ctk
 import tkinter as tk
 import constants as ctes
 from InfoFiles.lfp_file import LFPFile
 from InfoFiles.spike_file import SpikeFile
+from InfoFiles.folder import Folder
 from PIL import Image
 from Utils.loading import Loading
 from InfoFiles.info_file import InfoFile
@@ -11,16 +12,20 @@ from Utils.alert import Alert
 from Files.convert_matlab import ConvertMatlab
 
 class File:
-    def __init__(self, fn_show):
+    LOAD_FILE = 0
+    LOAD_FOLDER = 1
+
+    def __init__(self, fn_show, fn_enable_section):
         self._type_file = tk.StringVar(value=ctes.TYPE_FILES[0])
         self._path = None
         self._info_file = None
         self._all_files = {}
         self._type_file_window = None
         self._fn_show = fn_show
+        self._fn_enable_section = fn_enable_section
 
 
-    def select_format_file(self, master: ctk.CTkToplevel) -> ctk.CTkFrame:
+    def select_format_file(self, master: ctk.CTkToplevel, type) -> ctk.CTkFrame:
 
         frame = ctk.CTkFrame(
             master=master,
@@ -64,7 +69,7 @@ class File:
             text='Select',
             fg_color=ctes.LIGHT_BLUE_DARK,
             corner_radius=0,
-            command=self.select_file,
+            command=self.select_file if type == self.LOAD_FILE else self.select_folder,
             text_color=ctes.BLACK,
             hover_color=ctes.GRAY_COLOR,
             border_color=ctes.BORDER_COLOR,
@@ -74,12 +79,12 @@ class File:
 
         return frame
 
-    def select_type(self) -> None:
+    def select_type(self, type) -> None:
         self._type_file_window = ctk.CTkToplevel()
         self._type_file_window.title("Select Format File")
         self._type_file_window.geometry("500x300")
         self._type_file_window.wm_attributes("-topmost", True)
-        frame_sf = self.select_format_file(self._type_file_window)
+        frame_sf = self.select_format_file(self._type_file_window, type)
         frame_sf.pack()
 
     def select_file(self) -> None:
@@ -89,11 +94,30 @@ class File:
         self._info_file = None
         if self._type_file_window is not None: self._type_file_window.destroy()
         self._path = askopenfilename()
-        Loading().start(self.last_step)
+        if self._path is not None and self._path.strip() != '':
+            Loading().start(self.last_step)
+
+    def select_folder(self) -> None:
+        if self._type_file.get() == ctes.TYPE_FILES[2]:
+            Alert("Functionality not implemented", "This functionality is currently under development").show()
+            return
+        self._info_file = None
+        if self._type_file_window is not None: self._type_file_window.destroy()
+        self._path = askdirectory()
+        if self._path is not None and self._path.strip() != '':
+            Loading().start(self.last_step_folder)
 
     @property
     def info_file(self):
         return self._info_file
+
+    def last_step_folder(self):
+        self._info_file = Folder(self._path)
+        if self._info_file is not None:
+            self._info_file.extract_info()
+            self._fn_show()
+        self._fn_enable_section()
+        Loading().change_state()
 
     def last_step(self):
         if self._type_file.get() == ctes.TYPE_FILES[0]:
@@ -118,6 +142,7 @@ class File:
                 Alert("Finished", f'The matlab file is located in the ./Convert path with the name: {name}').show()
         else:
             pass
+        self._fn_enable_section()
         Loading().change_state()
 
     def change_current_file(self, name):
@@ -142,28 +167,54 @@ class File:
     def files(self):
         return self._all_files
 
-    def load(self) -> None:
-        self.select_type()
+    def load_file(self) -> None:
+        self.select_type(self.LOAD_FILE)
+
+    def load_folder(self) -> None:
+        self.select_type(self.LOAD_FOLDER)
 
     def show(self, frame) -> None:
         upload_file_img = ctk.CTkImage(
             light_image=Image.open('./assets/upload_file.png'),
             dark_image=Image.open('./assets/upload_file.png'),
-            size=(70, 70)
+            size=(30, 30)
         )
 
-        btn = ctk.CTkButton(
+        btn_file = ctk.CTkButton(
             master=frame,
             width=ctes.WIDTH_LEFT_SIDE - 5,
-            height=115,
-            text='Select file',
+            height=55,
+            text='Select File',
             image=upload_file_img,
             fg_color='transparent',
             corner_radius=0,
-            command=self.load,
+            command=self.load_file,
             text_color=ctes.GRAY_COLOR,
             hover_color=ctes.PINK_GRAY_COLOR,
         )
-        btn.cget("font").configure(family=ctes.FAMILY_FONT)
-        btn.cget("font").configure(size=20)
-        btn.place(relx=0.01, rely=0.02, anchor=ctk.NW)
+
+        upload_folder_img = ctk.CTkImage(
+            light_image=Image.open('./assets/folder_icon.png'),
+            dark_image=Image.open('./assets/folder_icon.png'),
+            size=(30, 30)
+        )
+
+        btn_folder = ctk.CTkButton(
+            master=frame,
+            width=ctes.WIDTH_LEFT_SIDE - 5,
+            height=55,
+            text='Select Folder',
+            image=upload_folder_img,
+            fg_color='transparent',
+            corner_radius=0,
+            command=self.load_folder,
+            text_color=ctes.GRAY_COLOR,
+            hover_color=ctes.PINK_GRAY_COLOR,
+        )
+        btn_file.cget("font").configure(family=ctes.FAMILY_FONT)
+        btn_file.cget("font").configure(size=20)
+        btn_file.place(relx=0.01, rely=0.02, anchor=ctk.NW)
+
+        btn_folder.cget("font").configure(family=ctes.FAMILY_FONT)
+        btn_folder.cget("font").configure(size=20)
+        btn_folder.place(relx=0.01, rely=0.5, anchor=ctk.NW)

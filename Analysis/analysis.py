@@ -189,15 +189,29 @@ class Analysis(ABC):
             data_in_freq = self.files.info_file.nex
         else:
             data_in_freq = file.nex
-        range1 = self._get_range(signal, time1, n) - 1
-        range2 = self._get_range(signal, time2, n)
-        data = data_in_freq.iloc[freq1:freq2, range1:range2]
-        matlab_string = "["
-        for r, fila in data.iterrows():
-            matlab_string += " ".join(map(str, fila)) + "; "
-        matlab_string = matlab_string[:-2]  # Eliminar el último "; "
-        matlab_string += "]"
+
+        if time1 == time2:
+            data = data_in_freq.iloc[:, signal+1]
+            matlab_string = '['
+            for item in data:
+                matlab_string += f"{item}; "
+            matlab_string += ']'
+        else:
+            range1 = self._get_range(signal, time1, n) - 1
+            range2 = self._get_range(signal, time2, n)
+            data = data_in_freq.iloc[freq1:freq2+1, range1:range2]
+            matlab_string = "["
+            for r, fila in data.iterrows():
+                matlab_string += " ".join(map(str, fila)) + "; "
+            matlab_string = matlab_string[:-2]  # Eliminar el último "; "
+            matlab_string += "]"
         return matlab_string
 
     def _get_range(self, i, car, n) -> int:
         return (2 + n * i) + car
+
+    def get_value_by_key(self, data, key):
+        for d in data:
+            if d[0] == key:
+                return d[1]
+        return None

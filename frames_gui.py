@@ -50,13 +50,14 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         height=ctes.INPUT_HEIGHT,
         anchor=ctk.N,
         text='Generate Analysis',
-        fg_color=ctes.GRAY_COLOR,
+        fg_color=(ctes.LIGTH_BLUE_COLOR, ctes.LIGTH_BLUE_COLOR_DISABLED),
         text_color=ctes.BLACK,
-        text_color_disabled=ctes.WITHE,
+        text_color_disabled=ctes.BLACK,
         border_width=ctes.BORDER_WIDTH_FRAME - 1,
         border_color=ctes.BLACK,
         corner_radius=0,
-        command=command_function_btn
+        command=command_function_btn,
+        state='disabled'
     )
     generate_btn.cget("font").configure(family=ctes.FAMILY_FONT)
     generate_btn.cget("font").configure(size=ctes.SUBTITLE_SIZE)
@@ -64,7 +65,7 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
 
     save_icon = ctk.CTkImage(
         light_image=Image.open('./assets/save_icon.png'),
-        dark_image=Image.open('./assets/save_icon.png'),
+        dark_image=Image.open('./assets/save_icon_dark.png'),
         size=(25, 25)
     )
 
@@ -78,11 +79,12 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         image=save_icon,
         width=25,
         command=callback_save_params,
+        state='disabled'
     )
     btn_save_params.pack(side=tk.RIGHT, padx=10, pady=ctes.PADY_BUTTON)
     btn_save_params.place(relx=0.8, y=5, anchor=ctk.NW)
 
-    return frame
+    return [frame, generate_btn, btn_save_params]
 
 
 def frame_type_analysis(master, change_callback) -> ctk.CTkComboBox:
@@ -99,6 +101,7 @@ def frame_type_analysis(master, change_callback) -> ctk.CTkComboBox:
         dropdown_hover_color=ctes.PINK_GRAY_COLOR,
         text_color=ctes.BLACK,
         dropdown_text_color=ctes.GRAY_COLOR,
+        state='disabled'
     )
     combo_type_analysis.set('Select Type of Analysis')
     combo_type_analysis.cget("font").configure(family=ctes.FAMILY_FONT)
@@ -264,6 +267,12 @@ def frame_multi_analysis(master, option, callback) -> ctk.CTkFrame:
     btn.pack()
 
     return frame
+
+def enable_section(section):
+    section.configure(state='normal')
+
+def disable_section(section):
+    section.configure(state='disabled')
 
 
 
