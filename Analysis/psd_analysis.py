@@ -98,7 +98,7 @@ class PSDAnalysis(Analysis):
         except:
             Alert(
                 title='ERROR',
-                message='An error occurred when trying generate analysis.'
+                message='An error occurred when trying generate analysis in load_analysis.'
             ).show()
 
     def _generate_all(self, taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2, trialave, err):
@@ -150,7 +150,7 @@ class PSDAnalysis(Analysis):
         except:
             Alert(
                 title='ERROR',
-                message='An error occurred when trying generate analysis.'
+                message='An error occurred when trying generate analysis in generate_all_files_th.'
             ).show()
 
     def _save_data_temp(self, name_file):
@@ -175,6 +175,7 @@ class PSDAnalysis(Analysis):
                 title='ERROR',
                 message='An error occurred when trying save parameters.'
             ).show()
+            Loading().change_state()
 
     def _generate_plot_all_files(self):
         # show plot
@@ -226,6 +227,8 @@ class PSDAnalysis(Analysis):
                             res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                             if res == 1:
                                 self._save_data_temp(select_signal)
+                            else:
+                                break
                         self._generate_plot_all_files()
             else:
                 self._generate_analysis_folder()
@@ -234,6 +237,7 @@ class PSDAnalysis(Analysis):
                 title='ERROR',
                 message='An error occurred when trying generate analysis.'
             ).show()
+            Loading().change_state()
 
     def _generate_analysis_folder(self):
         try:

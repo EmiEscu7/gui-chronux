@@ -134,7 +134,7 @@ class Analysis(ABC):
             return result
         except:
             print(f"{funtion}({params})")
-            print(decode.strip())
+            Alert('Error', (decode.strip())).show()
             Loading().change_state()
             return 0
 

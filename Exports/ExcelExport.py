@@ -1,5 +1,6 @@
 from Exports.export import Export
 from Utils.alert import Alert
+from Utils.loading import Loading
 import pandas as pd
 
 
@@ -17,3 +18,4 @@ class ExcelExport(Export):
             Alert(title='Export', message=f'Excel file generated in the route: {file_name}.xlsx').show()
         except:
             Alert(title='Error', message=f'An error occurred when exporting information to excel file.').show()
+            Loading().change_state()

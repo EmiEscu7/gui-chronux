@@ -108,6 +108,7 @@ class SpectogramAnalysis(Analysis):
                 title='ERROR',
                 message='An error occurred when trying generate analysis.'
             ).show()
+            Loading().change_state()
 
     def _generate_all(self, mw1, mw2, taper1, taper2, fs, freq1, freq2, freq_pass1, freq_pass2, time1, time2, trialave, err) -> None:
         print(f'{datetime.now().strftime("%Y/%m/%d %H:%M:%S")} - Started execution of Spectogram Analysis ')
@@ -195,6 +196,7 @@ class SpectogramAnalysis(Analysis):
                 title='ERROR',
                 message='An error occurred when trying save parameters.'
             ).show()
+            Loading().change_state()
 
     def _generate_plot_all_files(self, iter):
         for i in iter:
@@ -254,6 +256,8 @@ class SpectogramAnalysis(Analysis):
                             res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                             if res == 1:
                                 self._save_data_temp(select_signal)
+                            else:
+                                break
                         self._generate_plot_all_files(arr_signal)
             else:
                 self._generate_analysis_folder()
@@ -262,6 +266,7 @@ class SpectogramAnalysis(Analysis):
                 title='ERROR',
                 message='An error occurred when trying generate analysis.'
             ).show()
+            Loading().change_state()
 
     def _generate_analysis_folder(self):
         """
