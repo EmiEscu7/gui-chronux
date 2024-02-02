@@ -120,10 +120,13 @@ class SpectogramAnalysis(Analysis):
                 path_splitted = self.files.info_file.path.split('/')
                 file_name = path_splitted[len(path_splitted) - 1].split(".")[0]
                 os.renames("./Data/Spectogram/analysis.json", f"./Data/Spectogram/{file_name}_{label}.json")
-
-
-        for thread in self._trheads:
-            thread.join()
+            else:
+                Alert(
+                    title='ERROR',
+                    message='An error occurred while trying to run the analysis.'
+                ).show()
+                Loading().change_state()
+                return
 
         print(f'{datetime.now().strftime("%Y/%m/%d %H:%M:%S")} - Finish execution of Spectogram Analysis ')
         self._generate_plot_folder(self.files.info_file.file_name, './Data/Spectogram')
@@ -164,6 +167,8 @@ class SpectogramAnalysis(Analysis):
                 res = self.spectogram_analysis(signal_matrix, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                 if res == 1:
                     self._save_data_temp(file)
+                else:
+                    break
 
             self._generate_plot_all_files(files)
         except:
@@ -292,7 +297,8 @@ class SpectogramAnalysis(Analysis):
                 lfp_prueba = LFPFile(
                     self.get_value_by_key(self.files.info_file.show_info(), 'Folder Path') + "/" + file_name)
                 lfp_prueba.extract_info()
-                self._spectogram_analysis_folder(lfp_prueba)
+                if not self._spectogram_analysis_folder(lfp_prueba):
+                    break
             try:
                 self._generate_plot_folder(self.get_value_by_key(self.files.info_file.show_info(), 'Folder Name'), "./Data/Spectogram")
             except:
@@ -334,6 +340,8 @@ class SpectogramAnalysis(Analysis):
                 file_name = path_splitted[len(path_splitted)-1].split(".")[0]
                 os.renames("./Data/Spectogram/analysis.json", f"./Data/Spectogram/{file_name}_{label}.json")
                 print("done!")
+            else:
+                return False
         return True
     def spectogram_analysis(self, signal, movingwin1, movingwin2, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err, file_name = None):
         # Execute MATLAB in CMD and capture output

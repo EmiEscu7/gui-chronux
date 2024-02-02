@@ -107,6 +107,8 @@ class PSDAnalysis(Analysis):
             res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
             if res == 1:
                 self.generate_img_to_save(f"{label} - Spectral Power Density (PSD)", label)
+            else:
+                break
 
         self.generate_pptx(self._export_data_path)
         Loading().change_state()
@@ -145,6 +147,8 @@ class PSDAnalysis(Analysis):
                 res = self.psd_analysis(signal_matrix, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err)
                 if res == 1:
                     self._save_data_temp(file)
+                else:
+                    break
 
             self._generate_plot_all_files()
         except:
@@ -245,7 +249,8 @@ class PSDAnalysis(Analysis):
             for file_name in file_list:
                 lfp_prueba = LFPFile(self.get_value_by_key(self.files.info_file.show_info(), 'Folder Path') + "/" + file_name)
                 lfp_prueba.extract_info()
-                self._psd_analysis_folder(lfp_prueba)
+                if not self._psd_analysis_folder(lfp_prueba):
+                    break
             try:
                 self._generate_plot_folder(self.get_value_by_key(self.files.info_file.show_info(), 'Folder Name'), "./Data/PSD")
             except:
@@ -285,6 +290,8 @@ class PSDAnalysis(Analysis):
                 file_name = path_splitted[len(path_splitted) - 1].split(".")[0]
                 os.renames("./Data/PSD/analysis.json", f"./Data/PSD/{file_name}_{label}.json")
                 print("done!")
+            else:
+                return False
         return True
 
     def _generate_plot_folder(self, title, path):

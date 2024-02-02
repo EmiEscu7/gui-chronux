@@ -127,14 +127,15 @@ class Analysis(ABC):
         decode = output.decode()
         if "ERROR" in decode:
             print(f"{funtion}({params})")
-            print(decode)
+            Alert('Error', decode).show()
+            Loading().change_state()
             return 0.0
         try:
             result = float(decode.strip())
             return result
         except:
             print(f"{funtion}({params})")
-            Alert('Error', (decode.strip())).show()
+            Alert('Error', decode.strip()).show()
             Loading().change_state()
             return 0
 
