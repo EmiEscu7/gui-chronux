@@ -16,7 +16,8 @@ LIGTH_BLUE_COLOR_DISABLED = '#E8EEFC'
 # FONTS
 FAMILY_FONT = 'roboto'
 
-TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis', 'Coherence Analysis', 'Multiple PSD Analysis']
+TYPE_ANALYSIS = ['Select Type of Analysis', 'PSD Analysis', 'Spectogram Analysis',]
+# TYPE_ANALYSIS = ['Select Type of Analysis', 'Data Smoothing', 'PSD Analysis', 'Spectogram Analysis', 'Coherence Analysis', 'Multiple PSD Analysis']
 TYPE_FILES = ['Spike - Matlab', 'LFP - Matlab', 'Spike - CSV', 'LFP - CSV']
 
 # SIZES
@@ -28,6 +29,7 @@ RB_WIDTH = 25
 RB_HEIGHT = 25
 TITLE_SIZE = 30
 SUBTITLE_SIZE = 20
+ALERT_SIZE = 15
 TEXT_SIZE = 12
 INPUT_HEIGHT = 30
 INPUT_WIDTH = 290
