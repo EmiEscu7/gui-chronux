@@ -325,15 +325,15 @@ class PSDAnalysis(Analysis):
         else:
             set_limit = False
             self._neurons = self._psd_matrix
-            psd_mean = np.mean(self._neurons, axis=0)
-            std_mean = np.std(self._neurons, axis=0)
+            psd_mean = np.mean(self._neurons, axis=0)*100
+            std_mean = np.std(self._neurons, axis=0)*100
 
 
         b1 = psd_mean + std_mean
         b2 = psd_mean - std_mean
         f = np.mean(self._f_list, axis=0)
         self._number_session += 1
-        Plot().add_plot_multiple_psd(f, psd_mean, b1, b2, 'Frequency (Hz)', 'PSD (dB/Hz)', 'Spectral Power Density (PSD)', f'{title} - {self._number_session}', set_limit)
+        Plot().add_plot_multiple_psd(f, psd_mean, b1, b2, 'Spectral Power Density (PSD)', 'Frequency (Hz)', 'Power Spectral Density (%)',f'{title} - {self._number_session}', set_limit)
 
 
     def psd_analysis(self, signal, taper1, taper2, fs, freq_pass1, freq_pass2, trialave, err) -> float:

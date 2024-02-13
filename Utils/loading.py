@@ -46,12 +46,12 @@ class Loading:
         cls._lblVideo.pack(expand=True, fill="both")
         ret, frame = cls._cap.read()
         if ret == True:
-            frame = imutils.resize(frame, width=350)
+            frame = imutils.resize(frame, width=550)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             im = Image.fromarray(frame)
             img = ctk.CTkImage(
-                light_image=im, dark_image=im, size=(200, 150)
+                light_image=im, dark_image=im, size=(500, 375)
             )
 
             cls._lblVideo.configure(image=img)

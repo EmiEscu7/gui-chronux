@@ -26,6 +26,7 @@ class GUI:
         self._export = None
         self._load_files = None
         self._frame_params = None
+        self._frame_inputs = None
         self._tabview = None
         self._frame_analysis = None
         self._generate_btn = None
@@ -64,7 +65,7 @@ class GUI:
             enable_section(self._generate_btn)
             self._analysis.files = self._load_files
             self._analysis.load_analysis()
-            self._analysis.show_params(self._frame_params)
+            self._analysis.show_params(self._frame_inputs)
             if self._load_files.info_file is not None:
                 self._load_files.info_file.set_parameters(self._analysis)
         else:
@@ -112,11 +113,16 @@ class GUI:
             self._load_files.change_current_file(self._tabview.get())
             self._analysis.destroy()
             self._analysis.load_analysis()
-            self._analysis.show_params(self._frame_params)
+            self._analysis.show_params(self._frame_inputs)
 
     def callback_delete_tab(self, tab_name, new_tab):
         if self._load_files is not None:
             self._load_files.delete_file(tab_name, new_tab)
+
+        if self._load_files is None or self._load_files.info_file is None:
+            disable_section(self._frame_analysis)
+            disable_section(self._btn_save_params)
+            disable_section(self._generate_btn)
 
     def load_gui(self, geometry: str) -> ctk.CTk:
         ctk.set_appearance_mode("light")
@@ -136,7 +142,7 @@ class GUI:
         """
             PARAMETERS SECTION
         """
-        [self._frame_params, self._generate_btn, self._btn_save_params] = frame_parameters(app, self.command_function_btn, self.callback_save_params)
+        [self._frame_params, self._generate_btn, self._btn_save_params, self._frame_inputs] = frame_parameters(app, self.command_function_btn, self.callback_save_params)
         self._frame_params.pack()
         self._frame_params.place(relx=0.01, rely=0.20, anchor=ctk.NW)
 

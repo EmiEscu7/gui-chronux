@@ -21,7 +21,7 @@ def frame_load_files(master) -> ctk.CTkFrame:
 
 
 def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.CTkScrollableFrame:
-    frame = ctk.CTkScrollableFrame(
+    frame = ctk.CTkFrame(
         master=master,
         width=ctes.WIDTH_LEFT_SIDE-20,
         height=400,
@@ -29,8 +29,6 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         border_width=ctes.BORDER_WIDTH_FRAME,
         border_color=ctes.BORDER_COLOR,
         corner_radius=0,
-        scrollbar_button_color=ctes.GRAY_COLOR,
-        scrollbar_button_hover_color=ctes.LIGHT_GRAY_COLOR,
     )
 
     title = ctk.CTkLabel(
@@ -43,6 +41,17 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
         corner_radius=0,
     )
     title.pack(padx=ctes.PADX_SUBTITLE, pady=ctes.PADY_SUBTITLE)
+
+    frame_params = ctk.CTkScrollableFrame(
+        master=frame,
+        width=ctes.WIDTH_LEFT_SIDE - 25,
+        height=300,
+        fg_color='transparent',
+        corner_radius=0,
+        scrollbar_button_color=ctes.GRAY_COLOR,
+        scrollbar_button_hover_color=ctes.LIGHT_GRAY_COLOR,
+    )
+    frame_params.pack()
 
     generate_btn = ctk.CTkButton(
         master=frame,
@@ -84,7 +93,7 @@ def frame_parameters(master, command_function_btn, callback_save_params) -> ctk.
     btn_save_params.pack(side=tk.RIGHT, padx=10, pady=ctes.PADY_BUTTON)
     btn_save_params.place(relx=0.8, y=5, anchor=ctk.NW)
 
-    return [frame, generate_btn, btn_save_params]
+    return [frame, generate_btn, btn_save_params, frame_params]
 
 
 def frame_type_analysis(master, change_callback) -> ctk.CTkComboBox:

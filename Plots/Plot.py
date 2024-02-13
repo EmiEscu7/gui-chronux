@@ -178,7 +178,7 @@ class Plot:
 
             pcm = ax.imshow(np.transpose(s), aspect='auto', origin='lower', cmap='viridis',
                     extent=[t_min, t_max, f_min, f_max])
-            plt.colorbar(pcm, ax=ax, label='Power Spectral Density (dB)')
+            plt.colorbar(pcm, ax=ax, label='Log of PSD (dB)')
             ax.set_title(title_plot, fontsize=16)
             ax.set_xlabel(xlabel, fontsize=12)
             ax.set_ylabel(ylabel, fontsize=12)
