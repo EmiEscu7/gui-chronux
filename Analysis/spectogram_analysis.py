@@ -378,9 +378,20 @@ class SpectogramAnalysis(Analysis):
             self._t_matrix.append(data['t'])
             self._f_list.append(data['f'])
 
-        s = np.mean(np.array(self._s_matrix), axis=0)
-        t = np.mean(np.array(self._t_matrix), axis=0)
-        f = np.mean(np.array(self._f_list))
+        if len(np.shape(self._s_matrix)) > 2:
+            s = np.mean(np.array(self._s_matrix), axis=0)*100
+        else:
+            s = self._s_matrix*100
+
+        if len(np.shape(self._t_matrix)) > 1:
+            t = np.mean(np.array(self._t_matrix), axis=0)
+        else:
+            t = self._t_matrix
+
+        if len(np.shape(self._f_list)) > 1:
+            f = np.mean(np.array(self._f_list))
+        else:
+            f = self._f_list
         self._number_session += 1
         Plot().add_color_plot(t, f, 10 * np.log10(s), 'Time (s)', 'Frequency (Hz)', 'Signal Spectogram', f'{title} - {self._number_session}')
 

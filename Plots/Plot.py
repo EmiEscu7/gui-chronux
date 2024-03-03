@@ -45,6 +45,12 @@ class Plot:
         except:
             f_max = f + 15
 
+        if t_min == t_max:
+            t_max += 15
+
+        if f_min == f_max:
+            f_max += 15
+
         # s_log = 10 * np.log10(s)
         print([t_min, t_max, f_min, f_max])
         pcm = ax.imshow(s, origin='lower', aspect='auto', cmap='viridis', extent=[t_min, t_max, f_min, f_max])

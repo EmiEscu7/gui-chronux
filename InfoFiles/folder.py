@@ -103,7 +103,7 @@ class Folder(InfoFile):
         self._frequencies = self._get_freqs(nex)
 
         len_n = nex.shape[1]
-        self._duration = int(len_n / self._number_of_signals)
+        self._duration = int(len_n / len(signals))
         if self._duration == 1:
             self._times = ['1s', '1s']
         else:

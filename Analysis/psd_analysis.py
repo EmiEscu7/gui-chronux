@@ -310,12 +310,14 @@ class PSDAnalysis(Analysis):
                 data = json.loads(content)
 
             os.remove(file)
+            if self._psd_matrix is not None and len(self._psd_matrix) > 0 and len(self._psd_matrix[0]) != len(data['psd']):
+                break
             self._neuron_names.append(file_name.split(".")[0])
             self._psd_matrix.append(data['psd'])
             self._f_list.append(data['f'])
 
         self._neurons = []
-        if np.array(self._psd_matrix).ndim == 3:
+        if np.shape(self._psd_matrix)[0] == 3:
             set_limit = True
             for neuron in self._psd_matrix:
                 self._neurons.append(np.mean(neuron, axis=1))
